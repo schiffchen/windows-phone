@@ -1,0 +1,24 @@
+﻿<Application 
+    x:Class="Schiffchen.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"       
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+     xmlns:xna="clr-namespace:Microsoft.Xna.Framework;assembly=Microsoft.Xna.Framework.Interop">
+
+    <!--Anwendungsressourcen-->
+    <Application.Resources>
+    </Application.Resources>
+
+    <Application.ApplicationLifetimeObjects>
+        <!--Erforderliches Objekt, das Lebensdauerereignisse der Anwendung behandelt-->
+        <shell:PhoneApplicationService 
+            Launching="Application_Launching" Closing="Application_Closing" 
+            Activated="Application_Activated" Deactivated="Application_Deactivated"/>
+
+
+    <!--Der SharedGraphicsDeviceManager wird zum Rendern mithilfe der XNA-Grafik-APIs verwendet-->
+    <xna:SharedGraphicsDeviceManager />
+    </Application.ApplicationLifetimeObjects>
+
+</Application>
