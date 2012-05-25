@@ -108,6 +108,10 @@
       <Project>{766E48CC-9346-4119-A0B7-5BFF66555F90}</Project>
       <Name>SchiffchenLib</Name>
     </ProjectReference>
+    <ProjectReference Include="P:\xmpp\xmedianet\PhoneXMPPLibrary\phone.xmpp.csproj">
+      <Project>{08CA3C52-B65B-43F1-B60E-9A0F53021959}</Project>
+      <Name>phone.xmpp</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

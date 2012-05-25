@@ -10,7 +10,8 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
-using Matrix.Xmpp;
+using System.Net.XMPP;
+
 using System.IO;
 
 namespace Schiffchen
@@ -18,7 +19,8 @@ namespace Schiffchen
     public partial class MainPage : PhoneApplicationPage
     {
         string debug;
-        Matrix.Xmpp.Client.XmppClient client;
+        //Matrix.Xmpp.Client.XmppClient client;
+        XMPPClient XMPPClient;
 
         // Konstruktor
         public MainPage()
@@ -34,6 +36,8 @@ namespace Schiffchen
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
+           
+            /*
             client = new Matrix.Xmpp.Client.XmppClient();
             client.SetUsername("Fensterbank");
             client.SetXmppDomain("jabber.ccc.de");
@@ -89,8 +93,62 @@ namespace Schiffchen
 
             button1.Content = "Verbinde...";
 
+            XMPPClient = new XMPPClient();
+
+            XMPPClient.UserName = "berttester";
+            XMPPClient.Password = "test";
+            XMPPClient.Server = "jabber.ccc.de";
+            XMPPClient.Domain = "jabber.ccc.de";
+            XMPPClient.Resource = Guid.NewGuid().ToString();
+            XMPPClient.Port = 5223;
+
+            XMPPClient.UseTLS = false;
+            XMPPClient.OnServerDisconnect += new EventHandler(XMPPClient_OnServerDisconnect);
+            XMPPClient.OnXMLSent += new System.Net.XMPP.XMPPClient.DelegateString(XMPPClient_OnXMLSent);
+            XMPPClient.OnXMLReceived += new System.Net.XMPP.XMPPClient.DelegateString(XMPPClient_OnXMLReceived);
+            XMPPClient.JingleSessionManager.OnNewSession += new System.Net.XMPP.Jingle.JingleSessionManager.DelegateJingleSessionEventWithInfo(JingleSessionManager_OnNewSession);
+            XMPPClient.UseOldStyleTLS = true;
+
+           
+
+
+            XMPPClient.AutoAcceptPresenceSubscribe = false;
+            XMPPClient.AutomaticallyDownloadAvatars = false;
+            XMPPClient.RetrieveRoster = false;
+
+            XMPPClient.OnStateChanged += new EventHandler(XMPPClient_OnStateChanged);
+            XMPPClient.Connect(); 
+
         }
 
+        void JingleSessionManager_OnNewSession(string strSession, System.Net.XMPP.Jingle.JingleIQ iq, XMPPClient client)
+        {
+            int i = 0;
+        }
+
+        void XMPPClient_OnXMLReceived(XMPPClient client, string strXML)
+        {
+            int i = 0;
+        }
+
+        
+
+        void XMPPClient_OnXMLSent(XMPPClient client, string strXML)
+        {
+            
+            int i = 0;
+        }
+
+        void XMPPClient_OnServerDisconnect(object sender, EventArgs e)
+        {
+            int i = 0;
+        }
+
+        void XMPPClient_OnStateChanged(object sender, EventArgs e)
+        {
+            String state = XMPPClient.XMPPState.ToString() ;
+        }
+        /*
         void client_OnBindError(object sender, Matrix.Xmpp.Client.IqEventArgs e)
         {
             throw new NotImplementedException();
@@ -145,12 +203,27 @@ namespace Schiffchen
         }
 
 
-
+        */
         private void button2_Click(object sender, RoutedEventArgs e)
         {
+            PresenceStatus status = new PresenceStatus();
+            status.IsOnline = true;
+            status.PresenceShow = PresenceShow.chat;
+            status.PresenceType = PresenceType.available;
+            status.Priority = 10;
+            status.Status = "Testing";
 
-            client.SendPresence(client.Show, "Hallo Welt");
 
+            Capabilities cap = new Capabilities();
+            cap.Version = "1.0";
+            cap.Node = "";
+            cap.Extensions = "";
+
+            XMPPClient.PresenceLogic.SetPresence(status, cap, null);
+            button2.Content = XMPPClient.XMPPState;
+         
+            
         }
+         
     }
 }
