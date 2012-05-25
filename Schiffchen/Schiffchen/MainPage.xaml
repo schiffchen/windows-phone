@@ -31,7 +31,8 @@
             
             <!--Einzelne Schaltfläche erstellen, um zur zweiten Seite zu navigieren, die mit XNA Framwork gerendert wird-->
             <Button Height="100" Content="Zur Spieleseite wechseln" Click="Button_Click" />
-            <Button Content="Hallo Welt" Height="82" HorizontalAlignment="Left" Margin="12,6,0,0" Name="button1" VerticalAlignment="Top" Width="438" Click="button1_Click" />
+            <Button Content="Verbinden" Height="82" HorizontalAlignment="Left" Margin="12,6,0,0" Name="button1" VerticalAlignment="Top" Width="438" Click="button1_Click" />
+            <Button Content="Button" Height="72" HorizontalAlignment="Left" Margin="12,94,0,0" Name="button2" VerticalAlignment="Top" Width="438" Click="button2_Click" />
         </Grid>
     </Grid>
  
