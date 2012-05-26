@@ -11,7 +11,7 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="False">
+    shell:SystemTray.IsVisible="False" xmlns:my="clr-namespace:Microsoft.Phone.Controls.Maps;assembly=Microsoft.Phone.Controls.Maps">
 
     <!--LayoutRoot ist das Stammraster, in dem alle anderen Seiteninhalte platziert werden-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
@@ -22,17 +22,26 @@
 
         <!--TitlePanel enthält den Namen der Anwendung und den Seitentitel-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock x:Name="ApplicationTitle" Text="MEINE ANWENDUNG" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock x:Name="PageTitle" Text="xBattleship" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+            <TextBlock x:Name="ApplicationTitle" Text="MEINE ANWENDUNG" Style="{StaticResource PhoneTextNormalStyle}" />
+            <Grid Height="51" Name="grid1" Width="463">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="376*" />
+                    <ColumnDefinition Width="87*" />
+                </Grid.ColumnDefinitions>
+                <Ellipse Height="31" Name="ledState" Stroke="Black" StrokeThickness="1" Width="29" Fill="#FFCD1900" FlowDirection="RightToLeft" HorizontalAlignment="Right" Grid.Column="1" Margin="0,6,16,0" VerticalAlignment="Top" />
+                <TextBlock x:Name="PageTitle" Text="xBattleship" Style="{StaticResource PhoneTextTitle1Style}" Width="403" Grid.ColumnSpan="2" Margin="9,-27,51,-28" />
+            </Grid>
         </StackPanel>
 
         <!--ContentPanel - zusätzliche Inhalte hier platzieren-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             
             <!--Einzelne Schaltfläche erstellen, um zur zweiten Seite zu navigieren, die mit XNA Framwork gerendert wird-->
-            <Button Height="100" Content="Zur Spieleseite wechseln" Click="Button_Click" />
+            <Button Content="Zur Spieleseite wechseln" Click="Button_Click" Margin="0,556,0,6" />
             <Button Content="Verbinden" Height="82" HorizontalAlignment="Left" Margin="12,6,0,0" Name="button1" VerticalAlignment="Top" Width="438" Click="button1_Click" />
             <Button Content="Button" Height="72" HorizontalAlignment="Left" Margin="12,94,0,0" Name="button2" VerticalAlignment="Top" Width="438" Click="button2_Click" />
+            <TextBox Height="193" Margin="12,160,0,0" Name="tbSent" Text="" VerticalAlignment="Top" TextWrapping="Wrap" IsReadOnly="True" FontSize="16" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" />
+            <TextBox FontSize="16" Height="191" HorizontalScrollBarVisibility="Visible" IsReadOnly="True" Margin="6,359,6,0" Name="tbReceived" Text="" TextWrapping="Wrap" VerticalAlignment="Top" VerticalScrollBarVisibility="Visible" />
         </Grid>
     </Grid>
  

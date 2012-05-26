@@ -638,7 +638,8 @@ namespace System.Net.XMPP
         {
             try
             {
-                XMPPConnection.Send(Utility.GetXMLStringFromObject(objXMLSerializable));
+                String xml = Utility.GetXMLStringFromObject(objXMLSerializable);
+                XMPPConnection.Send(xml);
             }
             catch (Exception ex)
             {

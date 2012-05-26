@@ -219,7 +219,7 @@ namespace System.Net.XMPP
 
         void StartAuthentication()
         {
-            if ((AuthMethodsSupported & AuthMethod.MD5) == AuthMethod.MD5)
+            if ((AuthMethodsSupported & AuthMethod.MD5) == AuthMethod.MD5 & 1 == 2)
             {
                 AuthMethodUsed = AuthMethod.MD5;
                 XMPPClient.SendRawXML(MD5Auth);

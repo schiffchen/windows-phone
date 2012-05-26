@@ -6,11 +6,11 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("System.Net.XMPP")]
+[assembly: AssemblyTitle("PhoneSocketServer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("System.Net.XMPP")]
+[assembly: AssemblyProduct("PhoneSocketServer")]
 [assembly: AssemblyCopyright("Copyright ©  2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -21,7 +21,7 @@ using System.Resources;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("bbeb6c51-14b0-4fef-85e5-87debc0eddf9")]
+[assembly: Guid("38cce68a-b75f-43ae-9393-df12a383df61")]
 
 // Version information for an assembly consists of the following four values:
 //

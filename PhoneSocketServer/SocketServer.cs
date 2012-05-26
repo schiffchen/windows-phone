@@ -38,11 +38,22 @@ namespace SocketServer
       }
       public string GetString()
       {
-         return System.Text.Encoding.UTF8.GetString(m_data, 0, Length);
+          return System.Text.Encoding.UTF8.GetString(m_data, 0, Length);
       }
 
 
 
    }
 
+   public class TcpEventArgs : SocketEventArgs
+   {
+      public string strLine;
+      public TcpEventArgs( string str ) : base()
+      {
+         strLine = str;
+         m_data = System.Text.Encoding.UTF8.GetBytes(str);
+         Length = m_data.Length;
+      }
+
+   }
 }
