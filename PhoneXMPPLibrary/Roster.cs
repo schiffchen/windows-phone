@@ -240,14 +240,10 @@ namespace System.Net.XMPP
         {
             get
             {
-                lock (m_lockClientInstances)
-                {
-                    if ((m_objGeoLoc.lat == 0) && (m_objGeoLoc.lon == 0))
-                        return Windows.Visibility.Collapsed;
-                    else
-                        return Windows.Visibility.Visible;
-                    
-                }
+                if ((m_objGeoLoc.lat == 0) && (m_objGeoLoc.lon == 0))
+                    return Windows.Visibility.Collapsed;
+                else
+                    return Windows.Visibility.Visible;
             }
             set { }
 
@@ -386,6 +382,15 @@ namespace System.Net.XMPP
             }
         }
 
+        private RosterItemPresenceInstance[] ToArray(ObservableCollection<RosterItemPresenceInstance> list) {
+            RosterItemPresenceInstance[] array = new RosterItemPresenceInstance[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                array[i] = list[i];
+            }
+            return array;
+        }
+
         private PresenceStatus m_objPresence = new PresenceStatus();
 
         public PresenceStatus Presence
@@ -403,10 +408,10 @@ namespace System.Net.XMPP
 
         public void SetDisconnected()
         {
-            lock (m_lockClientInstances)
-            {
+            //lock (m_lockClientInstances)
+            //{
                 m_listClientInstances.Clear();
-            }
+            //}
             Presence.PresenceType = PresenceType.unavailable;
             Presence.PresenceShow = PresenceShow.unknown;
         }
@@ -442,10 +447,10 @@ namespace System.Net.XMPP
                     instance.Presence = pres.PresenceStatus;
                     if (pres.PresenceStatus.PresenceType == PresenceType.unavailable)
                     {
-                        lock (m_lockClientInstances)
-                        {
+                        //lock (m_lockClientInstances)
+                        //{
                             m_listClientInstances.Remove(instance);
-                        }
+                        //}
 
                         FirePropertyChanged("ClientInstances");
                         FirePropertyChanged("Name");
@@ -457,10 +462,10 @@ namespace System.Net.XMPP
                     instance.Presence = pres.PresenceStatus;
                     instance.CanClientDoAudio = bCanDoAudio;
                     instance.IsKnownGoogleClient = IsKnownGoogleClient;
-                    lock (m_lockClientInstances)
-                    {
+                    //lock (m_lockClientInstances)
+                    //{
                         m_listClientInstances.Add(instance);
-                    }
+                    //}
                     FirePropertyChanged("ClientInstances");
                     FirePropertyChanged("Name");
                 }
@@ -472,15 +477,18 @@ namespace System.Net.XMPP
             PresenceStatus beststatus = pres.PresenceStatus;
             if (pres.PresenceStatus.PresenceType != PresenceType.available)
             {
+                RosterItemPresenceInstance[] instances = null;
                 lock (m_lockClientInstances)
                 {
-                    foreach (RosterItemPresenceInstance instance in m_listClientInstances)
+                    instances = ToArray(m_listClientInstances);
+                }
+
+                foreach (RosterItemPresenceInstance instance in instances)
+                {
+                    if (instance.Presence.PresenceType == PresenceType.available)
                     {
-                        if (instance.Presence.PresenceType == PresenceType.available)
-                        {
-                            beststatus = instance.Presence;
-                            break;
-                        }
+                        beststatus = instance.Presence;
+                        break;
                     }
                 }
             }
@@ -497,15 +505,18 @@ namespace System.Net.XMPP
         {
             get 
             {
+                RosterItemPresenceInstance[] instances = null;
                 lock (m_lockClientInstances)
                 {
-                    foreach (RosterItemPresenceInstance instance in m_listClientInstances)
-                    {
-                        if (instance.CanClientDoAudio == true)
-                            return Windows.Visibility.Visible;
-                    }
-                    return Windows.Visibility.Collapsed;
+                    instances = ToArray(m_listClientInstances);
                 }
+
+                foreach (RosterItemPresenceInstance instance in instances)
+                {
+                    if (instance.CanClientDoAudio == true)
+                        return Windows.Visibility.Visible;
+                }
+                return Windows.Visibility.Collapsed;
             }
             set { }
          
@@ -518,26 +529,30 @@ namespace System.Net.XMPP
         /// <returns></returns>
         public RosterItemPresenceInstance FindAudioPresenceInstance()
         {
+            RosterItemPresenceInstance[] instances = null;
             lock (m_lockClientInstances)
             {
-                foreach (RosterItemPresenceInstance instance in m_listClientInstances)
-                {
-                    if (instance.CanClientDoAudio == true)
-                        return instance;
-                }
+                instances = ToArray(m_listClientInstances);
+            }
+            foreach (RosterItemPresenceInstance instance in instances)
+            {
+                if (instance.CanClientDoAudio == true)
+                    return instance;
             }
             return null;
         }
 
         public RosterItemPresenceInstance FindInstance(JID jid)
         {
+            RosterItemPresenceInstance[] instances = null;
             lock (m_lockClientInstances)
             {
-                foreach (RosterItemPresenceInstance instance in m_listClientInstances)
-                {
-                    if (jid.Equals(instance.FullJID) == true)
-                        return instance;
-                }
+                instances = ToArray(m_listClientInstances);
+            }
+            foreach (RosterItemPresenceInstance instance in instances)
+            {
+                if (jid.Equals(instance.FullJID) == true)
+                    return instance;
             }
             return null;
         }

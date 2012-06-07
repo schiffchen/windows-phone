@@ -56,12 +56,6 @@
     <Reference Include="Microsoft.Xna.Framework.Graphics" />
     <Reference Include="Microsoft.Xna.Framework.Input.Touch" />
     <Reference Include="microsoft.xna.framework.interop" />
-    <Reference Include="phone.socketserver">
-      <HintPath>P:\xmpp\xmedianet\PhoneXMPPLibrary\Bin\Debug\phone.socketserver.dll</HintPath>
-    </Reference>
-    <Reference Include="phone.xmpp">
-      <HintPath>P:\xmpp\xmedianet\PhoneXMPPLibrary\Bin\Debug\phone.xmpp.dll</HintPath>
-    </Reference>
     <Reference Include="System.Device" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -114,6 +108,14 @@
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\PhoneSocketServer\phone.socketserver.csproj">
+      <Project>{CCDE1A18-482A-469C-9115-3C51723026B7}</Project>
+      <Name>phone.socketserver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\PhoneXMPPLibrary\phone.xmpp.csproj">
+      <Project>{08CA3C52-B65B-43F1-B60E-9A0F53021959}</Project>
+      <Name>phone.xmpp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SchiffchenLib\SchiffchenLib.csproj">
       <Project>{766E48CC-9346-4119-A0B7-5BFF66555F90}</Project>
       <Name>SchiffchenLib</Name>

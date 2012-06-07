@@ -35,7 +35,9 @@ namespace System.Net.XMPP
         CanBind = 6,
         Binding = 7,
         Bound = 8,
-        Ready = 9,
+        Sessioning = 9,
+        Session = 10,
+        Ready = 11,
     }
 
     /// <summary>
@@ -211,6 +213,7 @@ namespace System.Net.XMPP
         }
 
 
+        public bool ShouldDoSession = false;
 
         /// <summary>
         /// The XMPP State machine.  SHould be 'Ready' before message are exchanged by external programs
@@ -265,15 +268,39 @@ namespace System.Net.XMPP
             }
             else if (XMPPState == System.Net.XMPP.XMPPState.Bound)
             {
+                if (ShouldDoSession == true)
+                {
+                    XMPPState = XMPP.XMPPState.Sessioning;
+                    GenericIQLogic.StartSession();
+                }
+                else
+                {
+                    Ready = false;
+                    if (RetrieveRoster == true)
+                        RosterLogic.Start();
+
+                    if (AutoQueryServerFeatures == true)
+                    {
+                        ServiceDiscoveryLogic.QueryServiceInfo();
+                        ServiceDiscoveryLogic.QueryServiceItems();
+                    }
+
+
+                    XMPPState = System.Net.XMPP.XMPPState.Ready;
+                }
+            }
+            else if (XMPPState == System.Net.XMPP.XMPPState.Session)
+            {
                 Ready = false;
                 if (RetrieveRoster == true)
-                   RosterLogic.Start();
+                    RosterLogic.Start();
 
                 if (AutoQueryServerFeatures == true)
                 {
                     ServiceDiscoveryLogic.QueryServiceInfo();
                     ServiceDiscoveryLogic.QueryServiceItems();
                 }
+
 
                 XMPPState = System.Net.XMPP.XMPPState.Ready;
             }
@@ -638,8 +665,7 @@ namespace System.Net.XMPP
         {
             try
             {
-                String xml = Utility.GetXMLStringFromObject(objXMLSerializable);
-                XMPPConnection.Send(xml);
+                XMPPConnection.Send(Utility.GetXMLStringFromObject(objXMLSerializable));
             }
             catch (Exception ex)
             {

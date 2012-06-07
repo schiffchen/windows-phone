@@ -79,14 +79,15 @@ namespace System.Net.XMPP
 
             if (XMPPClient.XMPPState >= XMPPState.Authenticated)
             {
-                if (xmlElem.Name == "features")
-                    return true;  /// If we hit this and parse the stream featurs a second time we re-authenticate.  Just return for now
 
-                //if (xmlElem.Name == "stream")
-                //{
-                //     XMPPClient.XMPPState = XMPPState.CanBind;
-                //}
-                /// TODO.. see if this new stream supports bind
+                //if (xmlElem.Name == "features")
+                //    return true;  /// If we hit this and parse the stream featurs a second time we re-authenticate.  Just return for now
+
+                ////if (xmlElem.Name == "stream")
+                ////{
+                ////     XMPPClient.XMPPState = XMPPState.CanBind;
+                ////}
+                ///// TODO.. see if this new stream supports bind
             }
           
 
@@ -118,6 +119,22 @@ namespace System.Net.XMPP
                 if (tls.Count() > 0)
                     FeatureTLS = true;
 
+                var session = xmlElem.Descendants("{urn:ietf:params:xml:ns:xmpp-session}session");
+                if (session.Count() > 0)
+                {
+                    XMPPClient.ShouldDoSession = true;
+                }
+
+                var bind = xmlElem.Descendants("{urn:ietf:params:xml:ns:xmpp-bind}bind");
+                if (bind.Count() > 0)
+                {
+                    XMPPClient.XMPPState = XMPPState.CanBind;
+                    return true;
+                }
+
+              
+                
+
                 if ((FeatureTLS == true) && (XMPPClient.UseTLS == true))
                 {
                     /// Tell the man we want to negotiate TLS
@@ -136,7 +153,13 @@ namespace System.Net.XMPP
 
                 /// After starting TLS, start our normal digest authentication (or plain)
                 /// 
-                StartAuthentication();
+                /// Bug or something changed after RFC.  Now 6120 says we must reopen the stream, our response should not have a TLS option in it
+                /// 
+                FeatureTLS = false;
+                OpenStreamStanza open = new OpenStreamStanza(this.XMPPClient);
+                XMPPClient.SendRawXML(open.XML);
+
+                //StartAuthentication();
             }
             else if (xmlElem.Name == "{urn:ietf:params:xml:ns:xmpp-sasl}challenge")
             {
@@ -146,6 +169,13 @@ namespace System.Net.XMPP
                 byte[] bData = Convert.FromBase64String(strChallenge);
                 string strUnbasedChallenge = System.Text.UTF8Encoding.UTF8.GetString(bData, 0, bData.Length);
 
+                if (strUnbasedChallenge.IndexOf("rspauth") == 0)
+                {
+
+                    string ResponseMessage = MD5Response.Replace("##RESPONSE##", "=");
+                    XMPPClient.SendRawXML(ResponseMessage);
+                    return false;
+                }
                 //realm="ninethumbs.com",nonce="oFun3YWfVm/6nHCkNI/9a4XpcWIdQ5RH9E0IDVKH",qop="auth",charset=utf-8,algorithm=md5-sess
 
                 //string strExampleResponse = "dXNlcm5hbWU9InRlc3QiLHJlYWxtPSJuaW5ldGh1bWJzLmNvbSIsbm9uY2U9InJaNjgreS9BeGp2SjJ6cjBCVUNxVUhQcG9ocFE4ZFkzR29JclpJcFkiLGNub25jZT0iVkdFRDNqNHUrUHE1M3IxYzNab2NhcGFzaWp1eTh2NjhoYXFzRC9IWjVKTT0iLG5jPTAwMDAwMDAxLGRpZ2VzdC11cmk9InhtcHAvbmluZXRodW1icy5jb20iLHFvcD1hdXRoLHJlc3BvbnNlPTdiM2MzOTVjZjU2MDA2Njg5MDg5MzdlYTk2YjEzZjI2LGNoYXJzZXQ9dXRmLTg=";
@@ -196,17 +226,20 @@ namespace System.Net.XMPP
             {
                 XMPPClient.XMPPState = XMPPState.Authenticated;
 
-                if (XMPPClient.UseTLS == true)
-                {
-                    /// Start a new stream for some strange reason, but don't close the old one.
-                    /// 
-                    OpenStreamStanza open = new OpenStreamStanza(this.XMPPClient);
-                    XMPPClient.SendRawXML(open.XML);
-                }
-                else
-                {
-                    XMPPClient.XMPPState = XMPPState.CanBind;
-                }
+                OpenStreamStanza open = new OpenStreamStanza(this.XMPPClient);
+                XMPPClient.SendRawXML(open.XML);
+
+                //if (XMPPClient.UseTLS == true)
+                //{
+                //    /// Start a new stream for some strange reason, but don't close the old one.
+                //    /// 
+                //    OpenStreamStanza open = new OpenStreamStanza(this.XMPPClient);
+                //    XMPPClient.SendRawXML(open.XML);
+                //}
+                //else
+                //{
+                    //XMPPClient.XMPPState = XMPPState.CanBind;
+                //}
             }
             else if (xmlElem.Name == "{urn:ietf:params:xml:ns:xmpp-sasl}failure")  /// Failed to authorize
             {

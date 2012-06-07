@@ -52,13 +52,24 @@ namespace System.Net.XMPP
             XMPPClient.XMPPState = XMPPState.Binding;
             XMPPClient.SendXMPP(BindIQ);
         }
-        
+
+        IQ sessioniq = null;
+        internal void StartSession()
+        {
+            sessioniq = new IQ();
+            sessioniq.InnerXML = "<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>";
+            sessioniq.From = null;
+            sessioniq.To = null;
+            sessioniq.Type = IQType.set.ToString();
+            XMPPClient.SendXMPP(sessioniq);
+        }
+
         
         public override bool NewIQ(IQ iq)
         {
             try
             {
-                if (iq.ID == BindIQ.ID)
+                if ( (BindIQ != null) && (iq.ID == BindIQ.ID))
                 {
                     /// Extract our jid incase it changed
                     /// <iq type="result" id="bind_1" to="ninethumbs.com/7b5005e1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>test@ninethumbs.com/hypnotoad</jid></bind></iq>
@@ -75,6 +86,11 @@ namespace System.Net.XMPP
                         }
                         XMPPClient.XMPPState = XMPPState.Bound;
                     }
+                    return true;
+                }
+                else if ((sessioniq != null) && (iq.ID == sessioniq.ID))
+                {
+                    XMPPClient.XMPPState = XMPPState.Session;
                     return true;
                 }
 

@@ -49,6 +49,16 @@ namespace System.Net.XMPP
          }
       }
 
+      public T[] ToArray()
+      {
+          List<T> Returnlist = new List<T>();
+          foreach (T item in this)
+          {
+              Returnlist.Add(item);
+          }
+
+          return Returnlist.ToArray();
+      }
    }
 #endif
 

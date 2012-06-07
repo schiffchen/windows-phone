@@ -229,8 +229,8 @@ namespace System.Net.XMPP
 
                     Flush();
 
-                    if (XMPPClient.XMPPState == XMPPState.Authenticated)
-                        XMPPClient.XMPPState = XMPPState.CanBind;
+                    //if (XMPPClient.XMPPState == XMPPState.Authenticated)
+                      //  XMPPClient.XMPPState = XMPPState.CanBind;
 
                  }
                  else if ( (objNode.NodeType == XmlNodeType.EndElement) && (CurrentNodeName == null) ) /// Must be a complete element

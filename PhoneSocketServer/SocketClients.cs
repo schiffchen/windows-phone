@@ -598,14 +598,14 @@ namespace SocketServer
             byte[] bData = (byte[])e.Buffer;
 
             int nLen = e.BytesTransferred;
-         
+
             if (nLen == 0)
             {
                 if (UserInitiatedDisconnect == false)
                    OnDisconnect("Graceful Disconnect");
                 return;
             }
-         
+
             if (bData == null)
             {
                 throw new Exception("bData is null in SocketClient.OnRecvDataAll");
