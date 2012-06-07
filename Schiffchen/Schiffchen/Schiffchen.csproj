@@ -70,9 +70,18 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GameElemens\ShipType.cs" />
     <Compile Include="GamePage.xaml.cs">
       <DependentUpon>GamePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Logic\AppCache.cs" />
+    <Compile Include="Logic\Enum\QueueingAction.cs" />
+    <Compile Include="Logic\Matchmaker.cs" />
+    <Compile Include="Logic\Messages\BattleshipMessage.cs" />
+    <Compile Include="Logic\Messages\QueuingMessage.cs" />
+    <Compile Include="Logic\Messages\Type.cs" />
+    <Compile Include="Logic\XMLManager.cs" />
+    <Compile Include="Logic\XMPPManager.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -124,6 +133,7 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
