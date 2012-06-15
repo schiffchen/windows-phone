@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Windows;
-using System.Windows.Controls;
+using System.Collections.Generic;
 using System.Windows.Documents;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -24,10 +24,28 @@ namespace Schiffchen.Logic
 
         public static void Queue(XMPPManager Manager)
         {
-            String xml = "<message from=\"" + Manager.OwnID.FullJID + "\" id=\"" + Guid.NewGuid() + "\" to=\"" + MatchmakerJID.BareJID + "\" type=\"normal\">\n<battleship xmlns=\"http://battleship.me/xmlns/\">\n<queueing action=\"request\" /></battleship></message>";
-            //IncomingMessage m = new IncomingMessage();
-            Manager.Client.SendRawXML(xml);
-            
+            QueuingMessage message = new QueuingMessage(Enum.QueueingAction.request, null);
+
+            Manager.Client.SendRawXML(message.ToSendXML(Manager.OwnID, MatchmakerJID));    
+        }
+
+        public static void Ping(XMPPManager Manager)
+        {
+            Dictionary<string, object> dict = new Dictionary<string,object>();
+            dict.Add("id", Manager.QueueID);
+
+            QueuingMessage message = new QueuingMessage(Enum.QueueingAction.ping, dict);
+            Manager.Client.SendRawXML(message.ToSendXML(Manager.OwnID, MatchmakerJID));
+        }
+
+        public static void Assigned(XMPPManager Manager, JID partner, Int32 mid)
+        {
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            dict.Add("mid", mid);
+            dict.Add("jid", partner.FullJID);
+
+            QueuingMessage message = new QueuingMessage(Enum.QueueingAction.assigned, dict);
+            Manager.Client.SendRawXML(message.ToSendXML(Manager.OwnID, MatchmakerJID));
         }
 
 

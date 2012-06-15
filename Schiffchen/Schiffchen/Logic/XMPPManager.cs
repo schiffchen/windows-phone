@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
+using System.Collections.Generic;
+
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -17,11 +17,19 @@ namespace Schiffchen.Logic
     public class XMPPManager
     {
         private XMPPClient client;
-        private MainPage mainPage;       
+        private MainPage mainPage;
+        private Int32 queueID;
+        private DispatcherTimer pingTimer;
+        private Boolean QueuingProcess;
 
         public XMPPClient Client
         {
             get { return this.client; }
+        }
+
+        public Int32 QueueID
+        {
+            get { return this.queueID; }
         }
 
         public JID OwnID
@@ -144,11 +152,38 @@ namespace Schiffchen.Logic
                     if (qMessage.Action== Enum.QueueingAction.success)
                     {
                         s = "Queue successfull.\nYour Queue ID is " + qMessage.ID;
+                        this.queueID = qMessage.ID;
                     }
-                    mainPage.Dispatcher.BeginInvoke(delegate
+                    else if (qMessage.Action == Enum.QueueingAction.ping)
                     {
-                        mainPage.tbReceived.Text = s;
+                        s = "Ping successful.";
+                    }
+                    else if (qMessage.Action == Enum.QueueingAction.assign)
+                    {
+                        if (QueuingProcess) {
+                            QueuingProcess = false;
+                            Matchmaker.Assigned(this, qMessage.JID, qMessage.MatchID);
+                            AppCache.CurrentMatch = new Match(qMessage.MatchID, this.OwnID, qMessage.JID);
+                        }
+                        s = "Assigned and generated Match. Mid = " + qMessage.MatchID;
+                    }
+                        mainPage.Dispatcher.BeginInvoke(delegate
+                    {
+                        mainPage.tbReceived.Text += DateTime.Now.ToLongTimeString() + ": " + s + "\n";
                     });
+                }
+                else if (bMessage is MatchMessage)
+                {
+                    MatchMessage mMessage = (MatchMessage)bMessage;
+                    switch (mMessage.Action)
+                    {
+                        case Enum.MatchAction.diceroll:
+                            if (AppCache.CurrentMatch != null)
+                            {
+                                AppCache.CurrentMatch.PartnerDice = mMessage.Dice;
+                            }
+                            break;
+                    }
                 }
             }
         }
@@ -167,6 +202,28 @@ namespace Schiffchen.Logic
             {
                 mainPage.button1.Content = "Nicht verbunden";
             });
+        }
+
+        public void RequestPlayerFromMatchmaker()
+        {
+            QueuingProcess = true;
+            Matchmaker.Queue(this);
+            pingTimer = new DispatcherTimer();
+            pingTimer.Tick += new EventHandler(pingTimer_Tick);
+            pingTimer.Interval = new TimeSpan(0, 0, 15);
+            pingTimer.Start();
+        }
+
+        void pingTimer_Tick(object sender, EventArgs e)
+        {
+            if (QueuingProcess)
+            {
+                Matchmaker.Ping(this);
+            }
+            else
+            {
+                pingTimer.Stop();
+            }
         }
     }
 }

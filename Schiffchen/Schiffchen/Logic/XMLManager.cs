@@ -59,7 +59,15 @@ namespace Schiffchen.Logic
                                                 message = new QueuingMessage(Enum.QueueingAction.assigned, dictionary);
                                                 break;
                                         }
-                                    }
+                                    }                                 
+                                    return message;
+                                }
+                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("diceroll"))
+                                {
+                                    int dice = Convert.ToInt32(reader.GetAttribute("diceroll"));
+                                    Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
+                                    dictionary.Add("dice", dice);
+                                    MatchMessage message = new MatchMessage(Enum.MatchAction.diceroll, dictionary);
                                     return message;
                                 }
                                 break;

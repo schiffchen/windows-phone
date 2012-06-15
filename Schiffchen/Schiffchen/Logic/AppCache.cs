@@ -15,6 +15,7 @@ namespace Schiffchen.Logic
     public class AppCache
     {
         public static XMPPManager XmppManager;
+        public static Match CurrentMatch;
         public static System.Windows.Media.SolidColorBrush cRed;
         public static  System.Windows.Media.SolidColorBrush cGreen;
         public static System.Windows.Media.SolidColorBrush cYellow;

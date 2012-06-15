@@ -12,6 +12,9 @@ using Microsoft.Phone.Controls;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Schiffchen.Resources;
+using Schiffchen.GameElemens;
+using Schiffchen.Logic;
 
 namespace Schiffchen
 {
@@ -20,6 +23,8 @@ namespace Schiffchen
         ContentManager contentManager;
         GameTimer timer;
         SpriteBatch spriteBatch;
+        TiledBackground background;
+        Match match;
 
         public GamePage()
         {
@@ -43,7 +48,12 @@ namespace Schiffchen
             // Erstellen Sie einen neuen SpriteBatch, der zum Zeichen von Texturen verwendet werden kann.
             spriteBatch = new SpriteBatch(SharedGraphicsDeviceManager.Current.GraphicsDevice);
 
-            // TODO: Hier Spielinhalt mit this.content laden
+            DeviceCache.ScreenWidth = SharedGraphicsDeviceManager.Current.GraphicsDevice.Viewport.Width;
+            DeviceCache.ScreenHeight = SharedGraphicsDeviceManager.Current.GraphicsDevice.Viewport.Height;
+            TextureManager.LoadContent(contentManager, SharedGraphicsDeviceManager.Current.GraphicsDevice);
+            FontManager.LoadContent(contentManager);
+            background = new TiledBackground(TextureManager.GameBackground, DeviceCache.ScreenWidth, DeviceCache.ScreenHeight);
+            match = new Match(42, new System.Net.XMPP.JID("asd@asd.de"), new System.Net.XMPP.JID("qsd@qsd.de"));
 
             // Timer starten
             timer.Start();
@@ -68,7 +78,7 @@ namespace Schiffchen
         /// </summary>
         private void OnUpdate(object sender, GameTimerEventArgs e)
         {
-            // TODO: Hier Aktualisierungslogik hinzufügen
+            background.Update(new Microsoft.Xna.Framework.Rectangle(0, 0, DeviceCache.ScreenWidth, DeviceCache.ScreenHeight));
         }
 
         /// <summary>
@@ -76,9 +86,15 @@ namespace Schiffchen
         /// </summary>
         private void OnDraw(object sender, GameTimerEventArgs e)
         {
-            SharedGraphicsDeviceManager.Current.GraphicsDevice.Clear(Color.CornflowerBlue);
+            SharedGraphicsDeviceManager.Current.GraphicsDevice.Clear(Color.Black);
 
-            // TODO: Hier Zeichnungscode hinzufügen
+
+            //spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap, DepthStencilState.Default, RasterizerState.CullNone);
+            //spriteBatch.Begin();
+            spriteBatch.Begin();
+            background.Draw(spriteBatch);
+            match.Draw(spriteBatch);
+            spriteBatch.End();
         }
     }
 }

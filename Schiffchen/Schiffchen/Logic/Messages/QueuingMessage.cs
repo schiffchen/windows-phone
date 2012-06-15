@@ -36,5 +36,25 @@ namespace Schiffchen.Logic.Messages
                     break;
             }
         }
+
+        public String ToSendXML(JID from, JID to)
+        {
+            String s = "<message from=\"" + from.FullJID + "\" id=\"" + Guid.NewGuid() + "\" to=\"" + to.FullJID + "\" type=\"normal\">\n<battleship xmlns=\"http://battleship.me/xmlns/\">";
+            switch (Action) {
+                case QueueingAction.request:
+                    s += "<queueing action=\"request\" />";
+                        break;
+                case QueueingAction.ping:
+                        s += "<queueing action=\"ping\" id=\"" + this.ID + "\" />";
+                        break;
+                case QueueingAction.assigned:
+                        s += "<queueing action=\"assigned\" jid=\"" + this.JID + "\" mid=\"" + this.MatchID + "\" />";
+                        break;
+                default:
+                    throw new Exception("This Queuing Message Type is not for sending!");
+            }
+            s += "</battleship>\n</message>";
+            return s;
+        }
     }
 }

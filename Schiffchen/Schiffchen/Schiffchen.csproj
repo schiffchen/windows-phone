@@ -70,14 +70,21 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Logic\DeviceCache.cs" />
+    <Compile Include="GameElemens\Field.cs" />
+    <Compile Include="GameElemens\Ship.cs" />
     <Compile Include="GameElemens\ShipType.cs" />
+    <Compile Include="GameElemens\TiledBackground.cs" />
     <Compile Include="GamePage.xaml.cs">
       <DependentUpon>GamePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Logic\AppCache.cs" />
+    <Compile Include="Logic\Enum\MatchAction.cs" />
     <Compile Include="Logic\Enum\QueueingAction.cs" />
+    <Compile Include="Logic\Match.cs" />
     <Compile Include="Logic\Matchmaker.cs" />
     <Compile Include="Logic\Messages\BattleshipMessage.cs" />
+    <Compile Include="Logic\Messages\MatchMessage.cs" />
     <Compile Include="Logic\Messages\QueuingMessage.cs" />
     <Compile Include="Logic\Messages\Type.cs" />
     <Compile Include="Logic\XMLManager.cs" />
@@ -88,6 +95,8 @@
     <Compile Include="Playground.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AppServiceProvider.cs" />
+    <Compile Include="Resources\FontManager.cs" />
+    <Compile Include="Resources\TextureManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

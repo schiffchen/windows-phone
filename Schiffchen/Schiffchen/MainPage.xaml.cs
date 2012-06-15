@@ -52,13 +52,7 @@ namespace Schiffchen
 
         private void button2_Click(object sender, RoutedEventArgs e)
         {
-            /*JID to = new JID("Fensterbank@jabber.ccc.de");
-            AppCache.XmppManager.Client.SendChatMessage("Hallo Welt", to);
-
-            String strXML = "<message from='berttester@jabber.ccc.de' type='chat' to='fensterbank@jabber.ccc.de'>\n<body>Hello you Facebook contact!</body>\n</message>".Replace('\'', '\"');
-            AppCache.XmppManager.Client.SendRawXML(strXML);*/
-
-            Matchmaker.Queue(AppCache.XmppManager);
+            AppCache.XmppManager.RequestPlayerFromMatchmaker();
         }
     }
 
