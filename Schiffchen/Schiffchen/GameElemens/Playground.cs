@@ -11,7 +11,7 @@ using System.Windows.Shapes;
 using Schiffchen.GameElemens;
 using Schiffchen.Logic;
 
-namespace Schiffchen
+namespace Schiffchen.GameElemens
 {
     public class Playground
     {

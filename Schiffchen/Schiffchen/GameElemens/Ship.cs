@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.Net.XMPP;
 using Schiffchen.Resources;
+using Schiffchen.Logic;
 
 namespace Schiffchen.GameElemens
 {
@@ -20,6 +21,11 @@ namespace Schiffchen.GameElemens
         public System.Windows.Controls.Orientation Orientation;
         public Field StartField { get; private set; }
 
+        private List<Field> Fields;
+
+        public Boolean isTouched { get; set; }
+
+        public Color OverlayColor { get; set; }
         
 
         private Texture2D shipTexture;
@@ -40,6 +46,7 @@ namespace Schiffchen.GameElemens
             this.HitPoints = new Dictionary<int, bool>();
             this.Orientation = or;
             this.Position = targetField.Position;
+            this.OverlayColor = Color.White;
             targetField.ReferencedShip = this;
             StartField = targetField;
             LoadTexture();
@@ -57,6 +64,7 @@ namespace Schiffchen.GameElemens
             this.Owner = owner;
             this.ShipType = type;
             this.HitPoints = new Dictionary<int, bool>();
+            this.OverlayColor = Color.White;
             this.Orientation = System.Windows.Controls.Orientation.Vertical;
             
 
@@ -138,9 +146,37 @@ namespace Schiffchen.GameElemens
                 return (float)DeviceCache.FieldSize.Width / this.shipTexture.Height;
         }
 
+        public void GlueToFields()
+        {
+            List<Field> fields = CollissionManager.GetFields(AppCache.CurrentMatch.Playground, this);
+            if (fields != null)
+            {
+                this.StartField = fields[0];
+                this.Position = fields[0].Position;
+                this.Fields = fields;
+                foreach (Field f in fields)
+                {
+                    f.ReferencedShip = this;
+                }
+            }
+        }
+
+        public void StartMovement()
+        {
+            this.StartField = null;
+            if (this.Fields != null)
+            {
+                foreach (Field f in this.Fields)
+                {
+                    f.ReferencedShip = null;
+                }
+                this.Fields = null;
+            }
+        }
+
         public void Draw(SpriteBatch spriteBatch)
         {
-                spriteBatch.Draw(shipTexture, new Vector2(Position.X, Position.Y), null, Color.White, 0f, Vector2.Zero, calculateSizeRatio(), SpriteEffects.None, 0f);
+                spriteBatch.Draw(shipTexture, new Vector2(Position.X, Position.Y), null, OverlayColor, 0f, Vector2.Zero, calculateSizeRatio(), SpriteEffects.None, 0f);
         }
     }
 }

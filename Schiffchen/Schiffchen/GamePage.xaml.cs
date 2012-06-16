@@ -81,6 +81,10 @@ namespace Schiffchen
         {
             background.Update(new Microsoft.Xna.Framework.Rectangle(0, 0, DeviceCache.ScreenWidth, DeviceCache.ScreenHeight));
             TouchManager.checkTouchpoints(e);
+            if (AppCache.CurrentMatch != null && AppCache.CurrentMatch.MatchState == Logic.Enum.MatchState.ShipPlacement && AppCache.TouchedShip != null)
+            {
+                CollissionManager.HandleFieldCheck(AppCache.CurrentMatch.Playground, AppCache.TouchedShip);
+            }
         }
 
         /// <summary>

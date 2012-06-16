@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Net.XMPP;
+using Schiffchen.GameElemens;
 
 namespace Schiffchen.Logic
 {
@@ -19,6 +20,7 @@ namespace Schiffchen.Logic
         public static System.Windows.Media.SolidColorBrush cRed;
         public static  System.Windows.Media.SolidColorBrush cGreen;
         public static System.Windows.Media.SolidColorBrush cYellow;
+        public static Ship TouchedShip;
 
         static AppCache()
         {

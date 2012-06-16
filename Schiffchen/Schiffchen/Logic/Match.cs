@@ -24,6 +24,8 @@ namespace Schiffchen.Logic
 
         private Playground currentPlayground;
 
+        public Playground Playground { get { return this.currentPlayground; } }
+
         public Match(Int32 mid, JID own, JID partner)
         {
             this.MatchState = Enum.MatchState.ShipPlacement;
