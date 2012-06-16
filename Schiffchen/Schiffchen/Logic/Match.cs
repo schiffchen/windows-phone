@@ -4,6 +4,7 @@ using System.Windows;
 using Microsoft.Xna.Framework.Graphics;
 using System.Net.XMPP;
 using Schiffchen.GameElemens;
+using Schiffchen.Logic.Enum;
 
 namespace Schiffchen.Logic
 {
@@ -18,12 +19,14 @@ namespace Schiffchen.Logic
         public JID CurrentTurn { get; private set; }
         public Int32 OwnDice { get; private set; }
         public Int32 PartnerDice { get; set; }
+        public MatchState MatchState { get; private set; }
         private Random rnd;
 
         private Playground currentPlayground;
 
         public Match(Int32 mid, JID own, JID partner)
         {
+            this.MatchState = Enum.MatchState.ShipPlacement;
             this.MatchID = mid;
             this.OwnJID = own;
             this.PartnerJID = partner;

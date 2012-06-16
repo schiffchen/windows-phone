@@ -79,6 +79,7 @@
       <DependentUpon>GamePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Logic\AppCache.cs" />
+    <Compile Include="Logic\Enum\MatchState.cs" />
     <Compile Include="Logic\Enum\MatchAction.cs" />
     <Compile Include="Logic\Enum\QueueingAction.cs" />
     <Compile Include="Logic\Match.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Logic\Messages\MatchMessage.cs" />
     <Compile Include="Logic\Messages\QueuingMessage.cs" />
     <Compile Include="Logic\Messages\Type.cs" />
+    <Compile Include="Logic\TouchManager.cs" />
     <Compile Include="Logic\XMLManager.cs" />
     <Compile Include="Logic\XMPPManager.cs" />
     <Compile Include="MainPage.xaml.cs">

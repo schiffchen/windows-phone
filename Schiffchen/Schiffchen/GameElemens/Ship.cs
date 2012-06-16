@@ -20,8 +20,18 @@ namespace Schiffchen.GameElemens
         public System.Windows.Controls.Orientation Orientation;
         public Field StartField { get; private set; }
 
+        
+
         private Texture2D shipTexture;
         private float scaleRate;
+
+        public Rectangle Rectangle
+        {
+            get
+            {
+                    return new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(shipTexture.Width * scaleRate), Convert.ToInt32(shipTexture.Height * scaleRate));
+            }
+        }
 
         public Ship(JID owner, ShipType type, System.Windows.Controls.Orientation or, Field targetField)
         {

@@ -24,7 +24,8 @@ namespace Schiffchen
         GameTimer timer;
         SpriteBatch spriteBatch;
         TiledBackground background;
-        Match match;
+    
+
 
         public GamePage()
         {
@@ -53,8 +54,8 @@ namespace Schiffchen
             TextureManager.LoadContent(contentManager, SharedGraphicsDeviceManager.Current.GraphicsDevice);
             FontManager.LoadContent(contentManager);
             background = new TiledBackground(TextureManager.GameBackground, DeviceCache.ScreenWidth, DeviceCache.ScreenHeight);
-            match = new Match(42, new System.Net.XMPP.JID("asd@asd.de"), new System.Net.XMPP.JID("qsd@qsd.de"));
-
+            AppCache.CurrentMatch = new Match(42, new System.Net.XMPP.JID("asd@asd.de"), new System.Net.XMPP.JID("qsd@qsd.de"));
+            TouchManager.SetGame();
             // Timer starten
             timer.Start();
 
@@ -79,6 +80,7 @@ namespace Schiffchen
         private void OnUpdate(object sender, GameTimerEventArgs e)
         {
             background.Update(new Microsoft.Xna.Framework.Rectangle(0, 0, DeviceCache.ScreenWidth, DeviceCache.ScreenHeight));
+            TouchManager.checkTouchpoints(e);
         }
 
         /// <summary>
@@ -93,7 +95,7 @@ namespace Schiffchen
             //spriteBatch.Begin();
             spriteBatch.Begin();
             background.Draw(spriteBatch);
-            match.Draw(spriteBatch);
+            AppCache.CurrentMatch.Draw(spriteBatch);
             spriteBatch.End();
         }
     }
