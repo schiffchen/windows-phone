@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework;
+using Schiffchen.Controls;
 using Schiffchen.GameElemens;
 
 namespace Schiffchen.Logic
@@ -13,9 +14,21 @@ namespace Schiffchen.Logic
 
         public static void SetGame()
         {
-            TouchPanel.EnabledGestures = GestureType.FreeDrag | GestureType.DragComplete;
+            TouchPanel.EnabledGestures = GestureType.FreeDrag | GestureType.DragComplete | GestureType.Tap;
         }
 
+        public static Vector2? GetTouchpoints()
+        {
+            if (TouchPanel.IsGestureAvailable)
+            {
+                GestureSample gs = TouchPanel.ReadGesture();
+                if (gs.GestureType == GestureType.Tap)
+                {
+                    return gs.Position;
+                }
+            }
+            return null;
+        }
 
         public static void checkTouchpoints(GameTimerEventArgs gameTime)
         {
@@ -38,14 +51,18 @@ namespace Schiffchen.Logic
                                     {
                                         if (s.Rectangle.Contains(p))
                                         {
-                                            found = true;
-                                            if (!s.isTouched)
+                                            if (!s.IsPlaced)
                                             {
-                                                s.StartMovement();
+                                                found = true;
+                                                if (!s.isTouched)
+                                                {
+                                                    s.StartMovement();
+                                                    AppCache.ActivePlacementShip = s;
+                                                }
+                                                s.isTouched = true;
+                                                s.Position += gs.Delta;
+                                                AppCache.TouchedShip = s;
                                             }
-                                            s.isTouched = true;
-                                            s.Position += gs.Delta;
-                                            AppCache.TouchedShip = s;
                                         }
                                         else
                                         {
@@ -74,6 +91,14 @@ namespace Schiffchen.Logic
                             }
                         }
                         break;
+                    case GestureType.Tap:
+                    #region Buttons
+                        foreach (IconButton b in AppCache.Buttons)
+                        {
+                            b.CheckClick(gs);
+                        }
+                    #endregion
+                            break;
                 }
 
             }

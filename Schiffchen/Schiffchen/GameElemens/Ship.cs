@@ -20,6 +20,7 @@ namespace Schiffchen.GameElemens
         public Int32 Size { get; private set; }
         public System.Windows.Controls.Orientation Orientation;
         public Field StartField { get; private set; }
+        public Boolean IsPlaced { get; private set; }
 
         private List<Field> Fields;
 
@@ -43,6 +44,7 @@ namespace Schiffchen.GameElemens
         {
             this.Owner = owner;
             this.ShipType = type;
+            this.IsPlaced = false;
             this.HitPoints = new Dictionary<int, bool>();
             this.Orientation = or;
             this.Position = targetField.Position;
@@ -62,6 +64,7 @@ namespace Schiffchen.GameElemens
         public Ship(JID owner, ShipType type)
         {
             this.Owner = owner;
+            this.IsPlaced = false;
             this.ShipType = type;
             this.HitPoints = new Dictionary<int, bool>();
             this.OverlayColor = Color.White;
@@ -148,6 +151,13 @@ namespace Schiffchen.GameElemens
 
         public void GlueToFields()
         {
+            if (this.Fields != null)
+            {
+                foreach (Field f in Fields)
+                {
+                    f.ReferencedShip = null;
+                }
+            }
             List<Field> fields = CollissionManager.GetFields(AppCache.CurrentMatch.Playground, this);
             if (fields != null)
             {
@@ -159,6 +169,31 @@ namespace Schiffchen.GameElemens
                     f.ReferencedShip = this;
                 }
             }
+        }
+
+        public void FinishPlacement()
+        {
+            this.OverlayColor = Color.White;
+            this.IsPlaced = true;
+            AppCache.ActivePlacementShip = null;
+            foreach (Field f in this.Fields)
+            {
+                f.ResetColor();
+            }
+        }
+
+        public void ToggleOrientation()
+        {
+            if (this.Orientation == System.Windows.Controls.Orientation.Horizontal)
+            {
+                this.Orientation = System.Windows.Controls.Orientation.Vertical;
+            }
+            else
+            {
+                this.Orientation = System.Windows.Controls.Orientation.Horizontal;
+            }
+            LoadTexture();
+            GlueToFields();
         }
 
         public void StartMovement()

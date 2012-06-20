@@ -25,6 +25,10 @@ namespace Schiffchen.Resources
         public static Texture2D ShipDestroyerH;
         public static Texture2D ShipSubmarineH;
 
+        public static Texture2D IconAccept;
+        public static Texture2D IconTurn;
+        public static Texture2D IconCancel;
+
         public static void LoadContent(Microsoft.Xna.Framework.Content.ContentManager Content, GraphicsDevice device)
         {
             GameBackground = Content.Load<Texture2D>("background\\water");
@@ -37,6 +41,9 @@ namespace Schiffchen.Resources
             ShipDestroyerH = Content.Load<Texture2D>("ships\\destroyer400h");
             ShipSubmarineH = Content.Load<Texture2D>("ships\\submarine400h");
             Transparent = Content.Load<Texture2D>("misc\\transp");
+            IconAccept = Content.Load<Texture2D>("icons\\accept");
+            IconCancel = Content.Load<Texture2D>("icons\\cancel");
+            IconTurn = Content.Load<Texture2D>("icons\\turn");
             Black = new Texture2D(device, 1, 1);
             Black.SetData(new[] { Color.Black });
             White = new Texture2D(device, 1, 1);

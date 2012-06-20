@@ -8,6 +8,9 @@ Content\ships\aircraftcarrier400h.xnb
 Content\ships\battleship400h.xnb
 Content\ships\destroyer400h.xnb
 Content\ships\submarine400h.xnb
+Content\icons\cancel.xnb
+Content\icons\turn.xnb
+Content\icons\accept.xnb
 Content\font\gameFont.xnb
 Content\font\infoFont.xnb
 Content\font\menuFont.xnb

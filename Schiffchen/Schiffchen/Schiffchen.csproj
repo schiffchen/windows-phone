@@ -70,6 +70,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\IconButton.cs" />
+    <Compile Include="Event\IconButtonEventArgs.cs" />
     <Compile Include="Logic\CollissionManager.cs" />
     <Compile Include="Logic\DeviceCache.cs" />
     <Compile Include="GameElemens\Field.cs" />

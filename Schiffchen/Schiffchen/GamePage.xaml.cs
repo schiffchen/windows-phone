@@ -83,8 +83,12 @@ namespace Schiffchen
             TouchManager.checkTouchpoints(e);
             if (AppCache.CurrentMatch != null && AppCache.CurrentMatch.MatchState == Logic.Enum.MatchState.ShipPlacement && AppCache.TouchedShip != null)
             {
-                CollissionManager.HandleFieldCheck(AppCache.CurrentMatch.Playground, AppCache.TouchedShip);
+                if (!AppCache.TouchedShip.IsPlaced)
+                {
+                    CollissionManager.HandleFieldCheck(AppCache.CurrentMatch.Playground, AppCache.TouchedShip);
+                }
             }
+            AppCache.Update();
         }
 
         /// <summary>
@@ -100,6 +104,7 @@ namespace Schiffchen
             spriteBatch.Begin();
             background.Draw(spriteBatch);
             AppCache.CurrentMatch.Draw(spriteBatch);
+            AppCache.Draw(spriteBatch);
             spriteBatch.End();
         }
     }
