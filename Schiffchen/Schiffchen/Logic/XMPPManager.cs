@@ -3,10 +3,7 @@ using System.Net;
 using System.Windows;
 using System.Collections.Generic;
 
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
+
 using System.Windows.Shapes;
 using System.Net.XMPP;
 using System.Windows.Threading;
@@ -120,21 +117,36 @@ namespace Schiffchen.Logic
                     mainPage.Dispatcher.BeginInvoke(delegate
                     {
                         mainPage.ledState.Fill = AppCache.cGreen;
-                        mainPage.button1.Content = "Trennen";
+                        mainPage.btnConnect.Content = "Disconnect";
+                        mainPage.lblConnectionState.Text = "Connected";
+                        mainPage.CheckDisplayedComponents();
                     });
                     break;
+        
                 case XMPPState.Unknown:
                 case XMPPState.AuthenticationFailed:
                     mainPage.Dispatcher.BeginInvoke(delegate
                     {
                         mainPage.ledState.Fill = AppCache.cRed;
-                        mainPage.button1.Content = "Verbinden";
+                        mainPage.btnConnect.Content = "Connect";
+                        mainPage.CheckDisplayedComponents();
+
+                        if (client.XMPPState == XMPPState.AuthenticationFailed)
+                        {
+                            mainPage.lblConnectionState.Text = "Authentication Failed";
+                        }
+                        else
+                        {
+                            mainPage.lblConnectionState.Text = "Disconnected";
+                        }
                     });
                     break;
                 default:
                     mainPage.Dispatcher.BeginInvoke(delegate
                     {
                         mainPage.ledState.Fill = AppCache.cYellow;
+                        mainPage.lblConnectionState.Text = client.XMPPState.ToString();
+                        mainPage.CheckDisplayedComponents();
                     });
                     break;
             }
@@ -147,29 +159,37 @@ namespace Schiffchen.Logic
             {
                 if (bMessage is QueuingMessage)
                 {
+                    Match m = null;
+
                     QueuingMessage qMessage = (QueuingMessage)bMessage;
                     String s = "";
                     if (qMessage.Action== Enum.QueueingAction.success)
                     {
-                        s = "Queue successfull.\nYour Queue ID is " + qMessage.ID;
+
+                        s = "Searching partner. Please wait...";
                         this.queueID = qMessage.ID;
                     }
                     else if (qMessage.Action == Enum.QueueingAction.ping)
                     {
-                        s = "Ping successful.";
+                        s = "Searching partner. Please wait...";
                     }
                     else if (qMessage.Action == Enum.QueueingAction.assign)
                     {
                         if (QueuingProcess) {
                             QueuingProcess = false;
                             Matchmaker.Assigned(this, qMessage.JID, qMessage.MatchID);
-                            AppCache.CurrentMatch = new Match(qMessage.MatchID, this.OwnID, qMessage.JID);
+                            m = new Match(qMessage.MatchID, this.OwnID, qMessage.JID);
                         }
-                        s = "Assigned and generated Match. Mid = " + qMessage.MatchID;
+                        s = "Assigned with partner!";
+                        
                     }
                         mainPage.Dispatcher.BeginInvoke(delegate
                     {
-                        mainPage.tbReceived.Text += DateTime.Now.ToLongTimeString() + ": " + s + "\n";
+                        mainPage.lblSearchState.Text = s;
+                        if (m != null)
+                        {
+                            mainPage.StartGame(m);
+                        }
                     });
                 }
                 else if (bMessage is MatchMessage)
@@ -190,18 +210,12 @@ namespace Schiffchen.Logic
 
         void XmppClient_OnXMLSent(XMPPClient client, string strXML)
         {
-            mainPage.Dispatcher.BeginInvoke(delegate
-            {
-                mainPage.tbSent.Text = strXML;
-            });
+            
         }
 
         void XmppClient_OnServerDisconnect(object sender, EventArgs e)
         {                   
-            mainPage.Dispatcher.BeginInvoke(delegate
-            {
-                mainPage.button1.Content = "Nicht verbunden";
-            });
+            
         }
 
         public void RequestPlayerFromMatchmaker()

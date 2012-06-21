@@ -160,7 +160,7 @@ namespace System.Net.XMPP
 
             XMPPStream.Append(strXML);
             XMPPStream.ParseStanzas(this, XMPPClient);
-            XMPPStream.Flush();
+            //XMPPStream.Flush();
 
 
             /// Parse out our stanza's

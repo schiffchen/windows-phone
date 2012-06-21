@@ -69,4 +69,44 @@ namespace System.Net.XMPP
         }
 
     }
+
+    public class WaitableLogic : Logic, IDisposable
+    {
+        public WaitableLogic(XMPPClient client) : base(client)
+        {
+        }
+
+     
+        protected System.Threading.ManualResetEvent GotEvent = new System.Threading.ManualResetEvent(false);
+
+        public virtual bool Wait(int nTimeoutMs)
+        {
+            Success = GotEvent.WaitOne(nTimeoutMs);
+            return Success;
+        }
+
+        private SerializationMethod m_eSerializationMethod = SerializationMethod.MessageXMLProperty;
+
+        public SerializationMethod SerializationMethod
+        {
+            get { return m_eSerializationMethod; }
+            set { m_eSerializationMethod = value; }
+        }
+
+        #region IDisposable Members
+
+        bool m_bIsDisposed = false;
+        public void Dispose()
+        {
+            if (m_bIsDisposed == false)
+            {
+                GotEvent.Close();
+                GotEvent.Dispose();
+                m_bIsDisposed = true;
+            }
+        }
+
+        #endregion
+    }
+
 }

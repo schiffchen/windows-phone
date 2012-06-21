@@ -184,6 +184,12 @@ namespace System.Net.XMPP
                    ByteStreamQueryIQ query = Utility.ParseObjectFromXMLString(strXML, typeof(ByteStreamQueryIQ)) as ByteStreamQueryIQ;
                    return query;
                }
+               //else if (((XElement)elem.FirstNode).Name == "{urn:ietf:params:xml:ns:xmpp-bind}bind")
+               //{
+               //    BindIQ query = Utility.ParseObjectFromXMLString(strXML, typeof(BindIQ)) as BindIQ;
+               //    return query;
+               //}
+                
                 
             }
 

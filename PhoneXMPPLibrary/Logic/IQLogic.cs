@@ -133,7 +133,7 @@ namespace System.Net.XMPP
         MessageXMLProperty,
     }
 
-    public class SendRecvIQLogic : Logic
+    public class SendRecvIQLogic : WaitableLogic
     {
         public SendRecvIQLogic(XMPPClient client, IQ iq)
             : base(client)
@@ -149,40 +149,20 @@ namespace System.Net.XMPP
             set { m_strInnerXML = value; }
         }
 
-        private int m_nTimeoutMs = 10000;
-
-        public int TimeoutMs
-        {
-            get { return m_nTimeoutMs; }
-            set { m_nTimeoutMs = value; }
-        }
-
-        private SerializationMethod m_eSerializationMethod = SerializationMethod.MessageXMLProperty;
-
-        public SerializationMethod SerializationMethod
-        {
-            get { return m_eSerializationMethod; }
-            set { m_eSerializationMethod = value; }
-        }
- 
-
+     
         public bool SendReceive(int nTimeoutMs)
         {
-            TimeoutMs = nTimeoutMs;
             if (SerializationMethod == XMPP.SerializationMethod.MessageXMLProperty)
                 XMPPClient.SendXMPP(SendIQ);
             else
                 XMPPClient.SendObject(SendIQ);
 
-            Success = GotIQEvent.WaitOne(TimeoutMs);
+            Success = GotEvent.WaitOne(nTimeoutMs);
             return Success;
         }
 
 
-
-        System.Threading.ManualResetEvent GotIQEvent = new System.Threading.ManualResetEvent(false);
         IQ m_objSendIQ = null;
-
         public IQ SendIQ
         {
             get { return m_objSendIQ; }
@@ -190,7 +170,6 @@ namespace System.Net.XMPP
         }
 
         private IQ m_objRecvIQ = null;
-
         public IQ RecvIQ
         {
             get { return m_objRecvIQ; }
@@ -206,8 +185,7 @@ namespace System.Net.XMPP
                     RecvIQ = iq;
                     IsCompleted = true;
                     Success = true;
-                    GotIQEvent.Set();
-
+                    GotEvent.Set();
                     return true;
                 }
             }
@@ -216,6 +194,56 @@ namespace System.Net.XMPP
             }
             return false;
         }
+
+    }
+
+
+    public class WaitForMessageLogic : WaitableLogic
+    {
+        public WaitForMessageLogic(XMPPClient client, Type msgtype)
+            : base(client)
+        {
+            MessageType = msgtype;
+        }
+
+        Type MessageType = null;
+
+        private string m_strInnerXML = "";
+
+        public string InnerXML
+        {
+            get { return m_strInnerXML; }
+            set { m_strInnerXML = value; }
+        }
+
+
+        private Message m_objRecvMessage = null;
+
+        public Message RecvMessage
+        {
+            get { return m_objRecvMessage; }
+            set { m_objRecvMessage = value; }
+        }
+
+        public override bool NewMessage(Message iq)
+        {
+            try
+            {
+                if (iq.GetType() ==  MessageType)
+                {
+                    RecvMessage = iq;
+                    IsCompleted = true;
+                    Success = true;
+                    GotEvent.Set();
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return false;
+        }
+
 
     }
 }

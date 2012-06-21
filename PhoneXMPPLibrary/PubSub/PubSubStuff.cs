@@ -48,13 +48,15 @@ namespace System.Net.XMPP
         {
             List<string> SubNodeList = new List<string>();
             string strXML = FetchChildNodes.Replace("#NODE#", strNode);
-            IQ IQRequest = new IQ();
-            IQRequest.From = connection.JID;
-            IQRequest.Type = IQType.get.ToString();
-            IQRequest.To = string.Format("pubsub.{0}", connection.Domain);
-            IQRequest.InnerXML = strXML;
 
-            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 10000);
+            ServiceDiscoveryIQ IQRequest = new ServiceDiscoveryIQ();
+            IQRequest.ServiceDiscoveryItemQuery = new ServiceDiscoveryItemQuery();
+            IQRequest.From = connection.JID;
+            IQRequest.To = string.Format("pubsub.{0}", connection.Domain);
+            IQRequest.Type = IQType.get.ToString();
+            IQRequest.ServiceDiscoveryItemQuery.Node = strNode;
+
+            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 10000, SerializationMethod.XMLSerializeObject);
 
             if (IQResponse == null)
                 return null;
@@ -64,31 +66,78 @@ namespace System.Net.XMPP
                 return SubNodeList.ToArray();
             }
 
-            var nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/disco#items}item");
-            foreach (XElement elem in nodes)
+            if (IQResponse is ServiceDiscoveryIQ)
             {
-                XAttribute attrnode = elem.Attribute("node");
-                if (attrnode != null)
-                   SubNodeList.Add(attrnode.Value);
+                ServiceDiscoveryIQ sdiq = IQResponse as ServiceDiscoveryIQ;
+                if ((sdiq.ServiceDiscoveryItemQuery != null) && (sdiq.ServiceDiscoveryItemQuery.Items != null) )
+                {
+                    foreach (item it in sdiq.ServiceDiscoveryItemQuery.Items)
+                    {
+                        SubNodeList.Add(it.Node);
+                    }
+                }
             }
+
+            //var nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/disco#items}item");
+            //foreach (XElement elem in nodes)
+            //{
+            //    XAttribute attrnode = elem.Attribute("node");
+            //    if (attrnode != null)
+            //       SubNodeList.Add(attrnode.Value);
+            //}
            
 
             return SubNodeList.ToArray();
         }
+
+        public static item[] GetSubNodeItems(XMPPClient connection, string strNode)
+        {
+            List<item> SubNodeList = new List<item>();
+            ServiceDiscoveryIQ IQRequest = new ServiceDiscoveryIQ();
+            IQRequest.ServiceDiscoveryItemQuery = new ServiceDiscoveryItemQuery();
+            IQRequest.From = connection.JID;
+            IQRequest.To = string.Format("pubsub.{0}", connection.Domain);
+            IQRequest.Type = IQType.get.ToString();
+            IQRequest.ServiceDiscoveryItemQuery.Node = strNode;
+
+            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 10000, SerializationMethod.XMLSerializeObject);
+
+            if (IQResponse == null)
+                return null;
+
+            if (IQResponse.Type == IQType.error.ToString())
+            {
+                return SubNodeList.ToArray();
+            }
+
+            if (IQResponse is ServiceDiscoveryIQ)
+            {
+                ServiceDiscoveryIQ sdiq = IQResponse as ServiceDiscoveryIQ;
+                if ((sdiq.ServiceDiscoveryItemQuery != null) && (sdiq.ServiceDiscoveryItemQuery.Items != null))
+                {
+                    foreach (item it in sdiq.ServiceDiscoveryItemQuery.Items)
+                    {
+                        SubNodeList.Add(it);
+                    }
+                }
+            }
+
+            return SubNodeList.ToArray();
+        }
+
 
         static string FetchChildNodesRoot = @"<query xmlns='http://jabber.org/protocol/disco#items'/>";
 
         public static string[] GetRootNodes(XMPPClient connection)
         {
             List<string> SubNodeList = new List<string>();
-            string strXML = FetchChildNodesRoot;
-            IQ IQRequest = new IQ();
+            ServiceDiscoveryIQ IQRequest = new ServiceDiscoveryIQ();
+            IQRequest.ServiceDiscoveryItemQuery = new ServiceDiscoveryItemQuery();
             IQRequest.From = connection.JID;
             IQRequest.To = string.Format("pubsub.{0}", connection.Domain);
             IQRequest.Type = IQType.get.ToString();
-            IQRequest.InnerXML = strXML;
 
-            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 10000);
+            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 10000, SerializationMethod.XMLSerializeObject);
 
             if (IQResponse == null)
                 return null;
@@ -98,50 +147,121 @@ namespace System.Net.XMPP
                 return SubNodeList.ToArray();
             }
 
-            var nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/disco#items}item");
-            foreach (XElement elem in nodes)
+            if (IQResponse is ServiceDiscoveryIQ)
             {
-                XAttribute attrnode = elem.Attribute("node");
-                SubNodeList.Add(attrnode.Value);
+                ServiceDiscoveryIQ sdiq = IQResponse as ServiceDiscoveryIQ;
+                if ( (sdiq.ServiceDiscoveryItemQuery != null) && (sdiq.ServiceDiscoveryItemQuery.Items != null))
+                {
+                    foreach (item it in sdiq.ServiceDiscoveryItemQuery.Items)
+                    {
+                        SubNodeList.Add(it.Node);
+                    }
+                }
             }
+            //var nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/disco#items}item");
+            //foreach (XElement elem in nodes)
+            //{
+            //    XAttribute attrnode = elem.Attribute("node");
+            //    SubNodeList.Add(attrnode.Value);
+            //}
            
 
             return SubNodeList.ToArray();
         }
 
 
-        static string GetNodeItemsXML =
-  @"<pubsub xmlns='http://jabber.org/protocol/pubsub'> <items node='#NODE#'/> </pubsub>";
-
-
-        public static string[] GetNodeItems(XMPPClient connection, string strNode, out string strNodeJID)
+        public static PubSubItem[] GetNodeItems(XMPPClient connection, string strNode, out string strNodeJID)
         {
             strNodeJID = "";
-            List<string> returnnodes = new List<string>();
-            IQ IQRequest = new IQ();
+            List<PubSubItem> returnnodes = new List<PubSubItem>();
+            PubSubIQ IQRequest = new PubSubIQ();
             IQRequest.Type = IQType.get.ToString();
             IQRequest.From = connection.JID;
             IQRequest.To = string.Format("pubsub.{0}", connection.Domain);
-            IQRequest.InnerXML = GetNodeItemsXML.Replace("#NODE#", strNode);;
-
-            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 30000);
+            IQRequest.PubSub = new PubSub();
+            IQRequest.PubSub.Items = new PubSubItems();
+            IQRequest.PubSub.Items.Node = strNode;
+            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 30000, SerializationMethod.XMLSerializeObject);
 
             if (IQResponse.Type == IQType.error.ToString())
             {
                 return returnnodes.ToArray();
             }
 
-            var nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/pubsub}items");
-            foreach (XElement elem in nodes)
+            if (IQResponse is PubSubIQ)
             {
-                strNodeJID = elem.Attribute("node").Value;
+                PubSubIQ psiq = IQResponse as PubSubIQ;
+                if ((psiq.PubSub != null) && (psiq.PubSub.Items != null))
+                {
+                    strNodeJID = psiq.PubSub.Items.Node;
+
+                    if (psiq.PubSub.Items.Items != null)
+                    {
+                        foreach (PubSubItem item in psiq.PubSub.Items.Items)
+                        {
+                            returnnodes.Add(item);
+                        }
+                    }
+                }
             }
 
-            nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/pubsub}item");
-            foreach (XElement elem in nodes)
+            return returnnodes.ToArray();
+        }
+
+        static string GetNodeItemsXML =
+  @"<pubsub xmlns='http://jabber.org/protocol/pubsub'> <items node='#NODE#'/> </pubsub>";
+
+
+        public static string[] GetNodeItemStrings(XMPPClient connection, string strNode, out string strNodeJID)
+        {
+            strNodeJID = "";
+            List<string> returnnodes = new List<string>();
+            PubSubIQ IQRequest = new PubSubIQ();
+            IQRequest.Type = IQType.get.ToString();
+            IQRequest.From = connection.JID;
+            IQRequest.To = string.Format("pubsub.{0}", connection.Domain);
+            IQRequest.PubSub = new PubSub();
+            IQRequest.PubSub.Items = new PubSubItems();
+            IQRequest.PubSub.Items.Node = strNode; 
+            
+
+            //IQRequest.InnerXML = GetNodeItemsXML.Replace("#NODE#", strNode);;
+
+            IQ IQResponse = connection.SendRecieveIQ(IQRequest, 30000, SerializationMethod.XMLSerializeObject);
+
+            if (IQResponse.Type == IQType.error.ToString())
             {
-                returnnodes.Add(elem.Value);
+                return returnnodes.ToArray();
             }
+
+            if (IQResponse is PubSubIQ)
+            {
+                PubSubIQ psiq = IQResponse as PubSubIQ;
+                if ((psiq.PubSub != null) && (psiq.PubSub.Items != null) )
+                {
+                    strNodeJID = psiq.PubSub.Items.Node;
+
+                    if (psiq.PubSub.Items.Items != null)
+                    {
+                        foreach (PubSubItem item in psiq.PubSub.Items.Items)
+                        {
+                            returnnodes.Add(item.InnerItemXML.Value);
+                        }
+                    }
+                }
+            }
+
+            //var nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/pubsub}items");
+            //foreach (XElement elem in nodes)
+            //{
+            //    strNodeJID = elem.Attribute("node").Value;
+            //}
+
+            //nodes = IQResponse.InitalXMLElement.Descendants("{http://jabber.org/protocol/pubsub}item");
+            //foreach (XElement elem in nodes)
+            //{
+            //    returnnodes.Add(elem.Value);
+            //}
             return returnnodes.ToArray();
         }
 

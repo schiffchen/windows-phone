@@ -7,6 +7,8 @@ using System.Net;
 
 using System.Xml;
 using System.Xml.Serialization;
+using System.Security;
+using System.Security.Cryptography;
 
 namespace System.Net.XMPP
 {
@@ -86,8 +88,19 @@ namespace System.Net.XMPP
         public byte[] Bytes
         {
             get { return m_bBytes; }
-            set { m_bBytes = value; }
+            set 
+            {
+                if (m_bBytes != value)
+                {
+                    m_bBytes = value;
+                    SHA1Managed sha = new SHA1Managed();
+                    Hash = SocketServer.TLS.ByteHelper.HexStringFromByte(sha.ComputeHash(m_bBytes), false, int.MaxValue);
+                }
+            }
         }
+
+        [XmlIgnore()]
+        public string Hash = null;
     }
 
     [XmlRoot(ElementName = "vCard", Namespace = "vcard-temp")]

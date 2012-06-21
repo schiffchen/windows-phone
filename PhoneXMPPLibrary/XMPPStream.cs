@@ -191,18 +191,19 @@ namespace System.Net.XMPP
             }
         }
 
+        string CurrentNodeName = null;
+        int NodeStackDepth = 0; /// Used in case we have a node inside a node...  ex: <iq><elemeent><iq><otherjunk>lksjdfl</otherjunk></iq></elemeent></iq>
       
         public void ParseStanzas(XMPPConnection connection, XMPPClient XMPPClient)
         {
            try
            {
 
-              string CurrentNodeName = null;
               XMPPXMLNode objNode = null;
 
               while ( (objNode = ReadNextBlock(false)) != null)
               {
-                 //System.Diagnostics.Debug.WriteLine("**ReadNextBlock got: {0}", objNode.Name);
+                 //System.Diagnostics.Debug.WriteLine(string.Format("**ReadNextBlock got: {0}, type: {1}", objNode.Name, objNode.NodeType));
                  if ((objNode.NodeType == XmlNodeType.XmlDeclaration) || (objNode.NodeType == XmlNodeType.Comment) || (objNode.NodeType == XmlNodeType.Whitespace))
                     continue;
 
@@ -217,7 +218,7 @@ namespace System.Net.XMPP
                  }
                  else if (objNode.Name == "stream:stream")
                  {
-                     System.Diagnostics.Debug.WriteLine("Got stream beggining fragment");
+                    //System.Diagnostics.Debug.WriteLine("Got stream beggining fragment");
                     FoundStreamBeginning = true;
                     To = objNode.GetAttribute("to");
                     From = objNode.GetAttribute("from");
@@ -236,7 +237,7 @@ namespace System.Net.XMPP
                  else if ( (objNode.NodeType == XmlNodeType.EndElement) && (CurrentNodeName == null) ) /// Must be a complete element
                  {
                      string strXML = FlushGet();
-                     //System.Diagnostics.Debug.WriteLine("Got unpaired end fragment: {0}", strXML);
+                     //System.Diagnostics.Debug.WriteLine(string.Format("Got unpaired end fragment: {0}", strXML));
 
                      XMPPStanza stanza = new XMPPStanza(strXML);
                      connection.FireStanzaReceived(stanza);
@@ -246,21 +247,37 @@ namespace System.Net.XMPP
                      if (CurrentNodeName == null)
                      {
                          CurrentNodeName = objNode.Name;
-                         //System.Diagnostics.Debug.WriteLine("Setting CurrentNodeName to : {0}", CurrentNodeName);
+                         NodeStackDepth = 0;
+                         //System.Diagnostics.Debug.WriteLine(string.Format("Setting CurrentNodeName to : {0}", CurrentNodeName));
 
                      }
                      else
                      {
                          if (objNode.Name == CurrentNodeName) /// Found the end tag
                          {
-                             //System.Diagnostics.Debug.WriteLine("Found End tag to CurrentNodeName: {0}, setting to null", CurrentNodeName);
-                             // Extract all the text up to this position
-                             CurrentNodeName = null;
 
-                             string strXML = FlushGet();
+                             if (objNode.NodeType == XmlNodeType.EndElement)
+                             {
+                                 
+                                 if (NodeStackDepth == 0)
+                                 {
+                                     //System.Diagnostics.Debug.WriteLine(string.Format("Found End tag to CurrentNodeName: {0}, setting to null", CurrentNodeName));
+                                     // Extract all the text up to this position
+                                     CurrentNodeName = null;
 
-                             XMPPStanza stanza = new XMPPStanza(strXML);
-                             connection.FireStanzaReceived(stanza);
+                                     string strXML = FlushGet();
+
+                                     XMPPStanza stanza = new XMPPStanza(strXML);
+                                     connection.FireStanzaReceived(stanza);
+                                 }
+                                 else
+                                     NodeStackDepth--;
+                             }
+                             else
+                             {
+                                 //System.Diagnostics.Debug.WriteLine(string.Format("Found nested node with the same name as our CurrentNodeName, incrementing NodeStackDepth: {0}", CurrentNodeName));
+                                 NodeStackDepth++;
+                             }
                          }
                      }
                  }

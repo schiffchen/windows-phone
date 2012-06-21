@@ -93,7 +93,7 @@ namespace System.Net.XMPP
         public void GetAllItems(string strSubId)
         {
             IQGetAll = new PubSubIQ();
-            IQGetAll.Type = IQType.set.ToString();
+            IQGetAll.Type = IQType.get.ToString();
             IQGetAll.To = new JID(string.Format("pubsub.{0}", XMPPClient.Domain));
             IQGetAll.From = XMPPClient.JID;
             IQGetAll.PubSub.Items = new PubSubItems() { Node = Node, subid=strSubId  };

@@ -705,6 +705,38 @@ namespace System.Net.XMPP
     }
 
 
+    [XmlRoot(ElementName = "bind")]
+    public class Bind
+    {
+        public Bind()
+        {
+        }
 
+        private string m_strJID = null;
+        [XmlElement(ElementName = "jid")]
+        public string JID
+        {
+            get { return m_strJID; }
+            set { m_strJID = value; }
+        }
+
+     
+    }
+
+    [XmlRoot(ElementName = "iq")]
+    public class BindIQ : IQ
+    {
+        public BindIQ()
+            : base()
+        {
+        }
+        public BindIQ(string strXML)
+            : base(strXML)
+        {
+        }
+
+        [XmlElement(ElementName = "bind", Namespace = "urn:ietf:params:xml:ns:xmpp-bind")]
+        public Bind Bind = new Bind();
+    }
 
 }

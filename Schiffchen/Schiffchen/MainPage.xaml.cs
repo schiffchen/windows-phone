@@ -10,50 +10,102 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
-using System.Net.XMPP;
-using System.IO;
+
 using Schiffchen.Logic;
+using System.Net.XMPP;
 
 namespace Schiffchen
 {
     public partial class MainPage : PhoneApplicationPage
     {
-        public String ReceivedLog;
-
-        // Konstruktor
         public MainPage()
         {
             InitializeComponent();
-            ReceivedLog = String.Empty;
-
-            AppCache.XmppManager = new XMPPManager("berttester@jabber.ccc.de", "test", this);
+            CheckDisplayedComponents();
         }
 
-        // Einfacher Ereignishandler für das Klicken auf die Schaltfläche, um zur zweiten Seite zu wechseln
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new Uri("/GamePage.xaml", UriKind.Relative));
-        }
-
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-
-            if (AppCache.XmppManager.Client.XMPPState == XMPPState.Ready)
+            if (AppCache.XmppManager == null)
             {
-                button1.Content = "Trenne...";
-                AppCache.XmppManager.Client.Disconnect();
+                HandleConnect();
             }
-            else if (AppCache.XmppManager.Client.XMPPState == XMPPState.Unknown || AppCache.XmppManager.Client.XMPPState == XMPPState.AuthenticationFailed)
+            else
             {
-                button1.Content = "Verbinde...";                
-                AppCache.XmppManager.Client.Connect();
+                if (AppCache.XmppManager.Client.XMPPState == XMPPState.Ready)
+                {
+                    AppCache.XmppManager.Client.Disconnect();
+                }
+                else if (AppCache.XmppManager.Client.XMPPState == XMPPState.Unknown || AppCache.XmppManager.Client.XMPPState == XMPPState.AuthenticationFailed)
+                {
+                    HandleConnect();
+                }
             }
         }
 
-        private void button2_Click(object sender, RoutedEventArgs e)
+        private void HandleConnect()
+        {
+            if (cbAnonymous.IsChecked == true)
+            {
+                MessageBox.Show("Not implemented!");
+            }
+            else
+            {
+                if (String.IsNullOrEmpty(tbJID.Text) || String.IsNullOrEmpty(tbPwd.Password))
+                {
+                    MessageBox.Show("Please insert your Jabber-ID and Password!", "Error", MessageBoxButton.OK);
+                }
+                else
+                {
+                    AppCache.XmppManager = new XMPPManager(tbJID.Text, tbPwd.Password, this);
+                    AppCache.XmppManager.Client.Connect();
+                }
+            }
+        }
+
+        private void cbAnonymous_Checked(object sender, RoutedEventArgs e)
+        {
+            tbPwd.IsEnabled = false;
+            tbJID.IsEnabled = false;
+        }
+
+        private void cbAnonymous_Unchecked(object sender, RoutedEventArgs e)
+        {
+            tbPwd.IsEnabled = true;
+            tbJID.IsEnabled = true;
+        }
+
+        private void btnDirect_Click(object sender, RoutedEventArgs e)
+        {
+            lblSearchState.Text = "Connecting to Matchmaker...";
+        }
+
+        private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
             AppCache.XmppManager.RequestPlayerFromMatchmaker();
         }
-    }
 
+        public void StartGame(Match newMatch)
+        {
+            AppCache.CurrentMatch = newMatch;
+            NavigationService.Navigate(new Uri("/GamePage.xaml", UriKind.Relative));
+        }
+
+        public void CheckDisplayedComponents()
+        {
+            if (AppCache.XmppManager == null || AppCache.XmppManager.Client == null || AppCache.XmppManager.Client.XMPPState != XMPPState.Ready)
+            {
+                btnDirect.IsEnabled = false;
+                btnSearch.IsEnabled = false;
+                tbPartnerJID.IsEnabled = false;
+            }
+            else
+            {
+                btnDirect.IsEnabled = true;
+                btnSearch.IsEnabled = true;
+                tbPartnerJID.IsEnabled = true;
+            }
+        }
+ 
+    }
 }

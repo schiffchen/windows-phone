@@ -4,57 +4,72 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
-    SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="False" xmlns:my="clr-namespace:Microsoft.Phone.Controls.Maps;assembly=Microsoft.Phone.Controls.Maps">
+    SupportedOrientations="Portrait"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True">
 
     <!--LayoutRoot ist das Stammraster, in dem alle anderen Seiteninhalte platziert werden-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <!--Pivotsteuerelement-->
+        <controls:Pivot Title="BATTLESHIP ME">
+            <!--Pivotelement eins-->
+            <controls:PivotItem Header="Connection">
+                <StackPanel>
 
-        <!--TitlePanel enthält den Namen der Anwendung und den Seitentitel-->
-        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock x:Name="ApplicationTitle" Text="MEINE ANWENDUNG" Style="{StaticResource PhoneTextNormalStyle}" />
-            <Grid Height="51" Name="grid1" Width="463">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="376*" />
-                    <ColumnDefinition Width="87*" />
-                </Grid.ColumnDefinitions>
-                <Ellipse Height="31" Name="ledState" Stroke="Black" StrokeThickness="1" Width="29" Fill="#FFCD1900" FlowDirection="RightToLeft" HorizontalAlignment="Right" Grid.Column="1" Margin="0,6,16,0" VerticalAlignment="Top" />
-                <TextBlock x:Name="PageTitle" Text="xBattleship" Style="{StaticResource PhoneTextTitle1Style}" Width="403" Grid.ColumnSpan="2" Margin="9,-27,51,-28" />
-            </Grid>
-        </StackPanel>
+                    <TextBlock  Name="textBlock1" Text="Your Jabber-ID"  />
+                    <TextBox Name="tbJID" Text="berttester@jabber.ccc.de" />
 
-        <!--ContentPanel - zusätzliche Inhalte hier platzieren-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            
-            <!--Einzelne Schaltfläche erstellen, um zur zweiten Seite zu navigieren, die mit XNA Framwork gerendert wird-->
-            <Button Content="Zur Spieleseite wechseln" Click="Button_Click" Margin="0,556,0,6" />
-            <Button Content="Verbinden" Height="82" HorizontalAlignment="Left" Margin="12,6,0,0" Name="button1" VerticalAlignment="Top" Width="438" Click="button1_Click" />
-            <Button Content="Button" Height="72" HorizontalAlignment="Left" Margin="12,94,0,0" Name="button2" VerticalAlignment="Top" Width="438" Click="button2_Click" />
-            <TextBox Height="193" Margin="12,160,0,0" Name="tbSent" Text="" VerticalAlignment="Top" TextWrapping="Wrap" IsReadOnly="True" FontSize="16" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" />
-            <TextBox FontSize="16" Height="191" HorizontalScrollBarVisibility="Visible" IsReadOnly="True" Margin="6,359,6,0" Name="tbReceived" Text="" TextWrapping="Wrap" VerticalAlignment="Top" VerticalScrollBarVisibility="Visible" />
-        </Grid>
+                    <TextBlock Name="textBlock2" Text="Your Password"  />
+                    <PasswordBox  Name="tbPwd" Password="test"  />
+
+                    <CheckBox Content="Anonymous Login" Name="cbAnonymous" Checked="cbAnonymous_Checked" Unchecked="cbAnonymous_Unchecked" />
+
+                    <StackPanel VerticalAlignment="Bottom" Margin="0,150,0,0">
+                        <Button Content="Connect" Name="btnConnect" Click="btnConnect_Click" />
+
+                        <StackPanel Orientation="Horizontal" >
+                            <Ellipse Fill="#FFCD1900" Height="32" VerticalAlignment="Center" Margin="10,0,20,0" Name="ledState" Stroke="Black" StrokeThickness="1" Width="32" />
+                            <TextBlock Height="32" VerticalAlignment="Center" Name="lblConnectionState" Text="Not connected"></TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+
+                </StackPanel>
+            </controls:PivotItem>
+
+            <!--Pivotelement zwei-->
+            <controls:PivotItem Header="Start Game">
+                <StackPanel>
+                    <TextBlock Text="Matchmaker Connection:"  FontSize="32"></TextBlock>
+                    <Button Content="Search Partner" Name="btnSearch" Click="btnSearch_Click"></Button>
+                    <TextBlock Name="lblSearchState" Text="" Margin="15,0"></TextBlock>
+                    <StackPanel Margin="0,150,0,0">
+                        <TextBlock Text="Direct Connection:" FontSize="32"></TextBlock>
+                        <TextBlock Height="30"  Name="textBlock4" Text="Jabber-ID of your partner"  />
+                        <TextBox Height="72" Name="tbPartnerJID"  VerticalAlignment="Top"  />
+                        <Button Content="Connect to partner" Name="btnDirect" Click="btnDirect_Click"></Button>
+                    </StackPanel>
+                </StackPanel>
+            </controls:PivotItem>
+        </controls:Pivot>
     </Grid>
- 
+
     <!--Beispielcode für die Verwendung von ApplicationBar-->
     <!--<phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Schaltfläche 1"/>
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Schaltfläche 2"/>
+            <shell:ApplicationBarIconButton x:Name="appbar_button1" IconUri="/Images/appbar_button1.png" Text="Schaltfläche 1"/>
+            <shell:ApplicationBarIconButton x:Name="appbar_button2" IconUri="/Images/appbar_button2.png" Text="Schaltfläche 2"/>
             <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem Text="Menüelement 1"/>
-                <shell:ApplicationBarMenuItem Text="Menüelement 2"/>
+                <shell:ApplicationBarMenuItem x:Name="menuItem1" Text="Menüelement 1"/>
+                <shell:ApplicationBarMenuItem x:Name="menuItem2" Text="Menüelement 2"/>
             </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>-->
-
+    
 </phone:PhoneApplicationPage>

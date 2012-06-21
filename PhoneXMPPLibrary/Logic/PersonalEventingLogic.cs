@@ -36,6 +36,7 @@ namespace System.Net.XMPP
             iq.From = XMPPClient.JID;
             iq.PubSub.Publish = new Publish() { Node = "http://jabber.org/protocol/tune", Item = new PubSubItem() };
             iq.PubSub.Publish.Item.SetNodeFromObject(item);
+            iq.PubSub.Publish.Item.Id = "lasttune";
 
             ListSentIQs.Add(iq.ID);
 
@@ -82,6 +83,7 @@ namespace System.Net.XMPP
             iq.From = XMPPClient.JID;
             iq.PubSub.Publish = new Publish() { Node = "urn:xmpp:avatar:data", Item = new PubSubItem() };
             iq.PubSub.Publish.Item.SetNodeFromObject(data);
+            iq.PubSub.Publish.Item.Id = "xmmpavatar";
 
             ListSentIQs.Add(iq.ID);
             XMPPClient.SendObject(iq);
@@ -100,6 +102,7 @@ namespace System.Net.XMPP
             iqmeta.From = XMPPClient.JID;
             iqmeta.PubSub.Publish = new Publish() { Node = "urn:xmpp:avatar:metadata", Item = new PubSubItem() {Id = strHash } };
             iqmeta.PubSub.Publish.Item.SetNodeFromObject(metadata);
+            iq.PubSub.Publish.Item.Id = "metaavatar";
 
             ListSentIQs.Add(iqmeta.ID);
             XMPPClient.SendObject(iqmeta);

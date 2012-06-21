@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Media.Imaging;
 #endif
 
 using System.IO;
@@ -138,20 +139,25 @@ namespace System.Net.XMPP
             if (storage.DirectoryExists(AccountFolder) == false)
                 storage.CreateDirectory(AccountFolder);
 
+
             // Load from storage
             IsolatedStorageFileStream location = null;
             try
             {
-                location = new IsolatedStorageFileStream(strFileName, System.IO.FileMode.Open, storage);
-
-                
-                DataContractSerializer ser = new DataContractSerializer(typeof(JIDtoHash[]));
-                JIDtoHash[] hashes = (JIDtoHash[] ) ser.ReadObject(location);
-                DicJidHash.Clear();
-
-                foreach (JIDtoHash jh in hashes)
+                if (storage.FileExists(strFileName) == true)
                 {
-                    DicJidHash.Add(jh.JID, jh);
+
+                    location = new IsolatedStorageFileStream(strFileName, System.IO.FileMode.Open, storage);
+
+
+                    DataContractSerializer ser = new DataContractSerializer(typeof(JIDtoHash[]));
+                    JIDtoHash[] hashes = (JIDtoHash[])ser.ReadObject(location);
+                    DicJidHash.Clear();
+
+                    foreach (JIDtoHash jh in hashes)
+                    {
+                        DicJidHash.Add(jh.JID, jh);
+                    }
                 }
 
             }
@@ -189,7 +195,7 @@ namespace System.Net.XMPP
 
 
 #if !MONO
-        public System.Windows.Media.Imaging.BitmapImage GetAvatarImage(string strHash)
+        public System.Windows.Media.Imaging.BitmapSource GetAvatarImage(string strHash)
         {
             System.Windows.Media.Imaging.BitmapImage objImage = null;
             IsolatedStorageFile storage = null;
@@ -211,18 +217,30 @@ namespace System.Net.XMPP
             try
             {
                 stream = new IsolatedStorageFileStream(strFileName, System.IO.FileMode.Open, storage);
-                objImage = new System.Windows.Media.Imaging.BitmapImage();
+
+                
 #if WINDOWS_PHONE
                 objImage.SetSource(stream);
 #else
+
+                byte[] bData = new byte[stream.Length];
+                stream.Read(bData, 0, bData.Length);
+
+                MemoryStream memstream = new MemoryStream(bData);
+
+
+                //JpegBitmapDecoder decoder = new JpegBitmapDecoder(memstream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                //BitmapFrame frame = decoder.Frames[0];
+                //objImage = frame;
+
+                objImage = new System.Windows.Media.Imaging.BitmapImage();
                 objImage.BeginInit();
                 objImage.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                 objImage.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.None;
-                
-                objImage.StreamSource = stream;
+                objImage.StreamSource = memstream;
                 objImage.EndInit();
 
-                double nWith = objImage.Width;
+                double nWidth = objImage.Width;
                 double nHeight = objImage.Height;
 #endif
 

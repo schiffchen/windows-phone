@@ -66,6 +66,7 @@
     <Compile Include="SOCKClasses.cs" />
     <Compile Include="SocketClients.cs" />
     <Compile Include="SocketServer.cs" />
+    <Compile Include="SOCKServer.cs" />
     <Compile Include="TLS\ByteHelper.cs" />
     <Compile Include="TLS\Cipher.cs" />
     <Compile Include="Mono\CipherMode.cs" />

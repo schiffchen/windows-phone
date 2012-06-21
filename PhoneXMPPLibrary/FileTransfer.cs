@@ -321,6 +321,39 @@ namespace System.Net.XMPP
             set { m_bAutoDownload = value; }
         }
 
+#if !WINDOWS_PHONE
+
+        public static bool UseLocalSOCKS5Server = true;
+        /// <summary>
+        /// A Local SOCKS5 Byte Stream server for file transfers.  Start this if you have a public IP or port forwarding setup and don't want to use the XMPP servers
+        /// </summary>
+        public static SocketServer.SOCKServer LocalSOCKS5ByteServer = null;
+
+        /// <summary>
+        /// The Port the local SOCKS5 Bytestream server should listen on.  Specify 0 to make it pick an available port
+        /// </summary>
+        public static int SOCKS5ByteServerPort = 0;
+
+        /// <summary>
+        /// The public address of the local SOCKS5 bytestream server.  Specify this when port forwarding has been setup
+        /// </summary>
+        public static string SOCKS5ByteServerPublicIP = null;
+
+        /// <summary>
+        /// Starts the app domain wide SOCKS5 bytestream server.  Does nothing when it's already started
+        /// </summary>
+        public static void StartSocks5ByteServer()
+        {
+            if (LocalSOCKS5ByteServer == null)
+            {
+                LocalSOCKS5ByteServer = new SocketServer.SOCKServer();
+                LocalSOCKS5ByteServer.Port = SOCKS5ByteServerPort;
+                LocalSOCKS5ByteServer.SOCKSServerMode = SocketServer.SOCKSServerMode.XMPPSOCKS5ByteStream;
+                LocalSOCKS5ByteServer.Start();
+                SOCKS5ByteServerPort = LocalSOCKS5ByteServer.Port;
+            }
+        }
+#endif
 
         object m_objFileTransferLock = new object();
 

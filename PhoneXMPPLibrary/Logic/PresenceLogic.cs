@@ -389,7 +389,11 @@ namespace System.Net.XMPP
                             if ((XMPPClient.AvatarStorage.AvatarExist(pres.VCardUpdate.PhotoHash) == false) && (XMPPClient.AutomaticallyDownloadAvatars == true) )
                                 RequestVCARD(pres.From);
                             else
-                                item.AvatarImagePath = pres.VCardUpdate.PhotoHash;
+                            {
+                                System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(ThreadedUpdateAvatarImageHash),
+                                    new RosterItemImageHash() {RosterItem = item, ImageHash=pres.VCardUpdate.PhotoHash});
+                                //item.AvatarImagePath = pres.VCardUpdate.PhotoHash;
+                            }
                                 
    
                             //RequestVCARD(pres.From);
@@ -419,6 +423,17 @@ namespace System.Net.XMPP
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///  Update our image path in a thread since the GUI will be called
+        /// </summary>
+        /// <param name="obj"></param>
+        void ThreadedUpdateAvatarImageHash(object obj)
+        {
+            RosterItemImageHash itemhash = obj as RosterItemImageHash;
+            itemhash.RosterItem.AvatarImagePath = itemhash.ImageHash;
+
         }
 
         public void DownloadAvatarJabberIQMethod(JID jidfor)
@@ -543,5 +558,11 @@ namespace System.Net.XMPP
 
 
 
+    }
+
+    public class RosterItemImageHash
+    {
+        public RosterItem RosterItem {get; set;}
+        public string ImageHash { get; set; }
     }
 }
