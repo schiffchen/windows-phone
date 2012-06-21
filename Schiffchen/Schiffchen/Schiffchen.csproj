@@ -70,6 +70,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\FooterMenu.cs" />
     <Compile Include="Controls\IconButton.cs" />
     <Compile Include="Event\IconButtonEventArgs.cs" />
     <Compile Include="Logic\CollissionManager.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Logic\Messages\QueuingMessage.cs" />
     <Compile Include="Logic\Messages\Type.cs" />
     <Compile Include="Logic\TouchManager.cs" />
+    <Compile Include="Logic\VibrationManager.cs" />
     <Compile Include="Logic\XMLManager.cs" />
     <Compile Include="Logic\XMPPManager.cs" />
     <Compile Include="MainPage.xaml.cs">

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Net;
 using System.Windows;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using System.Net.XMPP;
 using Schiffchen.GameElemens;
 using Schiffchen.Logic.Enum;
 using Schiffchen.Resources;
 using Schiffchen.Controls;
+using Schiffchen.Logic.Messages;
 
 namespace Schiffchen.Logic
 {
@@ -27,6 +29,8 @@ namespace Schiffchen.Logic
         private Playground currentPlayground;
         private IconButton btnAccept;
         private IconButton btnTurn;
+   
+        public FooterMenu FooterMenu { get; private set; }
 
         public Playground Playground { get { return this.currentPlayground; } }
 
@@ -42,13 +46,16 @@ namespace Schiffchen.Logic
             this.rnd = new Random(DateTime.Now.Millisecond);
             this.currentPlayground = new Playground();
             InitializeShips();
+            FooterMenu = new FooterMenu(DeviceCache.BelowGrid, DeviceCache.ScreenHeight - DeviceCache.BelowGrid);
 
-            btnAccept = new IconButton(TextureManager.IconAccept, new Microsoft.Xna.Framework.Vector2(this.OwnShips[3].Position.X + 150, DeviceCache.BelowGrid ));
-            btnTurn = new IconButton(TextureManager.IconTurn, new Microsoft.Xna.Framework.Vector2(this.OwnShips[3].Position.X + 250, DeviceCache.BelowGrid));
-            AppCache.Buttons.Add(btnAccept);
-            AppCache.Buttons.Add(btnTurn);
+            btnAccept = new IconButton(TextureManager.IconAccept, "Place", "btnPlace");
+            btnTurn = new IconButton(TextureManager.IconTurn, "Turn", "btnTurn");
+           
             btnAccept.Visible = false;
             btnTurn.Visible = false;
+
+            FooterMenu.AddButton(btnAccept);
+            FooterMenu.AddButton(btnTurn);
 
             btnTurn.Click += new EventHandler<EventArgs>(btnTurn_Click);
             btnAccept.Click += new EventHandler<EventArgs>(btnAccept_Click);
@@ -68,6 +75,37 @@ namespace Schiffchen.Logic
             {
                 AppCache.ActivePlacementShip.FinishPlacement();
             }
+            if (areAllShipsPlaced())
+            {
+                FooterMenu.RemoveAllButtons();
+                IconButton btnDice = new IconButton(TextureManager.IconAccept, "Roll Dice", "btnDice");
+                btnDice.Click += new EventHandler<EventArgs>(btnDice_Click);
+                FooterMenu.AddButton(btnDice);
+            }
+        }
+
+        void btnDice_Click(object sender, EventArgs e)
+        {
+            int dice = this.Dice();
+            
+        }
+
+        private void SendDiceMessage(int dice)
+        {
+            Dictionary<string,object> dict = new Dictionary<string,object>();
+            dict.Add("dice", dice);
+            MatchMessage message = new MatchMessage(MatchAction.diceroll, dict);
+            AppCache.XmppManager.Client.SendRawXML(message.ToSendXML(this.OwnJID, this.PartnerJID));
+        }
+
+        private Boolean areAllShipsPlaced()
+        {
+            foreach (Ship s in this.OwnShips)
+            {
+                if (!s.IsPlaced)
+                    return false;
+            }
+            return true;
         }
 
         private void InitializeShips()
@@ -94,7 +132,6 @@ namespace Schiffchen.Logic
             {
                 if (AppCache.ActivePlacementShip != null)
                 {
-                    btnAccept.Visible = true;
                     btnTurn.Visible = true;
                 }
                 else
@@ -120,6 +157,7 @@ namespace Schiffchen.Logic
         public void Draw(SpriteBatch spriteBatch)
         {
             this.currentPlayground.Draw(spriteBatch);
+            FooterMenu.Draw(spriteBatch);
             foreach (Ship s in this.OwnShips)
             {
                 s.Draw(spriteBatch);

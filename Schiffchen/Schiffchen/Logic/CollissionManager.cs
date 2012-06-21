@@ -37,10 +37,12 @@ namespace Schiffchen.Logic
             if (counter == currentShip.Size)
             {
                 currentShip.OverlayColor = Color.Green;
+                AppCache.CurrentMatch.FooterMenu.Get("btnPlace").Visible = true;
             }
             else
             {
                 currentShip.OverlayColor = Color.Red;
+                AppCache.CurrentMatch.FooterMenu.Get("btnPlace").Visible = false;
                 foreach (Field f in markedFields)
                 {
                     f.SetColor(Enum.FieldColor.Red);

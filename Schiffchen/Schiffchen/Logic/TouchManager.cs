@@ -30,6 +30,77 @@ namespace Schiffchen.Logic
             return null;
         }
 
+        private static void HandleShipSelection(GestureSample gs)
+        {
+            if (AppCache.CurrentMatch != null)
+            {
+                if (AppCache.CurrentMatch.MatchState == Enum.MatchState.ShipPlacement)
+                {
+                    Point p = new Point(Convert.ToInt32(gs.Position.X), Convert.ToInt32(gs.Position.Y));
+                    foreach (Ship s in AppCache.CurrentMatch.OwnShips)
+                    {
+                            if (s.Rectangle.Contains(p))
+                            {
+                                if (!s.IsPlaced)
+                                {
+                                    if (!s.isTouched)
+                                    {
+                                        VibrationManager.Vibration.Start(new TimeSpan(0, 0, 0, 0, 100));
+                                        AppCache.ActivePlacementShip = s;
+                                    }
+                                    s.isTouched = true;
+                                    AppCache.TouchedShip = s;
+                                }
+                            }     
+                        }
+                    }
+                }
+            }
+    
+
+
+        private static void HandleShipTouchment(GestureSample gs)
+        {
+            if (AppCache.CurrentMatch != null)
+            {
+                if (AppCache.CurrentMatch.MatchState == Enum.MatchState.ShipPlacement)
+                {
+                    Point p = new Point(Convert.ToInt32(gs.Position.X), Convert.ToInt32(gs.Position.Y));
+                    Boolean found = false;
+                    foreach (Ship s in AppCache.CurrentMatch.OwnShips)
+                    {
+                        if (AppCache.TouchedShip == null || AppCache.TouchedShip == s)
+                        {
+                            if (s.Rectangle.Contains(p))
+                            {
+                                if (!s.IsPlaced)
+                                {
+                                    found = true;
+                                    if (!s.isTouched)
+                                    {
+                                        s.StartMovement();
+                                        VibrationManager.Vibration.Start(new TimeSpan(0, 0, 0, 0, 100));
+                                        AppCache.ActivePlacementShip = s;
+                                    }
+                                    s.isTouched = true;
+                                    s.Position += gs.Delta;
+                                    AppCache.TouchedShip = s;
+                                }
+                            }
+                            else
+                            {
+                                    s.isTouched = false;
+                            }
+                        }
+                    }
+                        if (!found)
+                        {
+                            AppCache.TouchedShip = null;
+                        }
+                }
+            }
+        }
+
         public static void checkTouchpoints(GameTimerEventArgs gameTime)
         {
             while (TouchPanel.IsGestureAvailable)
@@ -39,43 +110,7 @@ namespace Schiffchen.Logic
                 switch (gs.GestureType)
                 {
                     case GestureType.FreeDrag:
-                        if (AppCache.CurrentMatch != null)
-                        {
-                            if (AppCache.CurrentMatch.MatchState == Enum.MatchState.ShipPlacement)
-                            {
-                                Point p = new Point(Convert.ToInt32(gs.Position.X), Convert.ToInt32(gs.Position.Y));
-                                Boolean found = false;
-                                foreach (Ship s in AppCache.CurrentMatch.OwnShips)
-                                {
-                                    if (AppCache.TouchedShip == null || AppCache.TouchedShip == s)
-                                    {
-                                        if (s.Rectangle.Contains(p))
-                                        {
-                                            if (!s.IsPlaced)
-                                            {
-                                                found = true;
-                                                if (!s.isTouched)
-                                                {
-                                                    s.StartMovement();
-                                                    AppCache.ActivePlacementShip = s;
-                                                }
-                                                s.isTouched = true;
-                                                s.Position += gs.Delta;
-                                                AppCache.TouchedShip = s;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            s.isTouched = false;
-                                        }
-                                    }
-                                }
-                                if (!found)
-                                {                                   
-                                    AppCache.TouchedShip = null;
-                                }
-                            }
-                        }
+                        HandleShipTouchment(gs);
                         break;
                     case GestureType.DragComplete:
                         if (AppCache.CurrentMatch != null)
@@ -85,18 +120,28 @@ namespace Schiffchen.Logic
                                 Point p = new Point(Convert.ToInt32(gs.Position.X), Convert.ToInt32(gs.Position.Y));
                                 foreach (Ship s in AppCache.CurrentMatch.OwnShips)
                                 {
-                                    s.GlueToFields();
-                                    s.isTouched = false;
+                                    if (s.isTouched)
+                                    {
+                                        s.GlueToFields();
+                                        s.isTouched = false;
+                                        VibrationManager.Vibration.Start(new TimeSpan(0, 0, 0, 0, 100));
+                                    }
                                 }
                             }
                         }
                         break;
                     case GestureType.Tap:
-                    #region Buttons
-                        foreach (IconButton b in AppCache.Buttons)
+                        
+                        #region Buttons
+                        foreach (IconButton b in AppCache.CurrentMatch.FooterMenu.Buttons)
                         {
-                            b.CheckClick(gs);
+                            if (b != null)
+                                b.CheckClick(gs);
                         }
+
+                        #region Ships
+                        HandleShipSelection(gs);
+                        #endregion
                     #endregion
                             break;
                 }

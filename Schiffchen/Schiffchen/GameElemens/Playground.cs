@@ -24,10 +24,13 @@ namespace Schiffchen.GameElemens
             double GridWidth = DeviceCache.ScreenWidth - (DeviceCache.ScreenWidth * 0.1);
             double GridHeight = DeviceCache.ScreenHeight - (DeviceCache.ScreenHeight * 0.4);
             double GridLeft = DeviceCache.ScreenWidth * 0.05;
-            double GridTop = DeviceCache.ScreenHeight * 0.2;
+
+            
             double FieldWidth = GridWidth / PLAYGROUND_SIZE;
-           // double FieldHeight = GridHeight / PLAYGROUND_SIZE;
             double FieldHeight = FieldWidth;
+
+           
+            double GridTop = DeviceCache.ScreenHeight - (FieldHeight * PLAYGROUND_SIZE) - 200;
             DeviceCache.FieldSize = new Size(FieldWidth, FieldHeight);
 
             fields = new Field[PLAYGROUND_SIZE, PLAYGROUND_SIZE];

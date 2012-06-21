@@ -68,17 +68,19 @@ namespace Schiffchen.GameElemens
             this.ShipType = type;
             this.HitPoints = new Dictionary<int, bool>();
             this.OverlayColor = Color.White;
-            this.Orientation = System.Windows.Controls.Orientation.Vertical;
-            
 
-            LoadTexture();
-
-            
-
-            for (int i = 0; i < this.Size; i++)
+            switch (type)
             {
-                this.HitPoints.Add(i, false);
+                case Schiffchen.ShipType.DESTROYER:
+                case Schiffchen.ShipType.SUBMARINE:
+                    this.Orientation = System.Windows.Controls.Orientation.Vertical;
+                    break;
+                case Schiffchen.ShipType.BATTLESHIP:
+                case Schiffchen.ShipType.AIRCRAFT_CARRIER:
+                    this.Orientation = System.Windows.Controls.Orientation.Horizontal;
+                    break;
             }
+            LoadTexture();
 
             this.scaleRate = calculateSizeRatio();
 
@@ -86,18 +88,26 @@ namespace Schiffchen.GameElemens
             switch (type)
             {
                 case Schiffchen.ShipType.DESTROYER:
-                    this.Position = new Vector2(20, DeviceCache.BelowGrid);
+                    this.Position = new Vector2(20, DeviceCache.BelowGrid + 20);
                     break;
                 case Schiffchen.ShipType.SUBMARINE:
-                    this.Position = new Vector2(20 + (1 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid);
+                    this.Position = new Vector2(20 + (1 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid + 20);
                     break;
                 case Schiffchen.ShipType.BATTLESHIP:
-                    this.Position = new Vector2(20 + (2 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid);
+                    this.Position = new Vector2(20 + (2 * (this.shipTexture.Height * scaleRate)) + 20, DeviceCache.BelowGrid + 20);
                     break;
                 case Schiffchen.ShipType.AIRCRAFT_CARRIER:
-                    this.Position = new Vector2(20 + (3 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid);
+                    this.Position = new Vector2(20 + (2 * (this.shipTexture.Height * scaleRate)) + 20, DeviceCache.BelowGrid + (this.shipTexture.Height * scaleRate) + 30);
                     break;
             }
+
+
+            for (int i = 0; i < this.Size; i++)
+            {
+                this.HitPoints.Add(i, false);
+            }
+
+            
         }
 
         private void LoadTexture()

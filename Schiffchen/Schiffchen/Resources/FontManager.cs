@@ -13,6 +13,7 @@ namespace Schiffchen.Resources
         public static SpriteFont MenuFont;
         public static SpriteFont GameFont;
         public static SpriteFont InfoFont;
+        public static SpriteFont ButtonFont;
 
 
 
@@ -21,6 +22,7 @@ namespace Schiffchen.Resources
             MenuFont = Content.Load<SpriteFont>("font\\menuFont");
             GameFont = Content.Load<SpriteFont>("font\\gameFont");
             InfoFont = Content.Load<SpriteFont>("font\\infoFont");
+            ButtonFont = Content.Load<SpriteFont>("font\\buttonFont");
         }
     }
 }

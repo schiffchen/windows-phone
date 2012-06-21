@@ -25,22 +25,18 @@ namespace Schiffchen.Logic
         public static Ship TouchedShip;
         public static Ship ActivePlacementShip;
 
-        public static List<IconButton> Buttons;
 
         static AppCache()
         {
             cRed = new System.Windows.Media.SolidColorBrush(Color.FromArgb(255, 190, 0, 0));
             cGreen = new System.Windows.Media.SolidColorBrush(Color.FromArgb(255, 68, 140, 0));
             cYellow = new System.Windows.Media.SolidColorBrush(Color.FromArgb(255, 255, 224, 98));
-            Buttons = new List<IconButton>();
+
         }
 
         public static void Draw(SpriteBatch spriteBatch)
         {
-            foreach (IconButton b in Buttons)
-            {
-                b.Draw(spriteBatch);
-            }
+
         }
 
         public static void Update()
