@@ -8,8 +8,9 @@ namespace Schiffchen
     {
         public static Int32 ScreenWidth;
         public static Int32 ScreenHeight;
-        public static Size FieldSize;
+ 
         public static Int32 BelowGrid;
+        public static Int32 BelowSmallGrid;
        
     }
 }

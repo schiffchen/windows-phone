@@ -9,12 +9,16 @@ using Schiffchen.Logic.Enum;
 using Schiffchen.Resources;
 using Schiffchen.Controls;
 using Schiffchen.Logic.Messages;
+using Schiffchen.GameElemens;
+using Schiffchen.Event;
+using Microsoft.Xna.Framework;
+using System.Windows.Threading;
 
 namespace Schiffchen.Logic
 {
     public class Match
     {
-        public Int32 MatchID { get; private set; }
+        public String MatchID { get; private set; }
         public JID OwnJID { get; private set; }
         public JID PartnerJID { get; private set; }
         public DateTime Started { get; private set; }
@@ -25,32 +29,44 @@ namespace Schiffchen.Logic
         public Int32 PartnerDice { get; set; }
         public MatchState MatchState { get; private set; }
         private Random rnd;
+        public Playground OwnPlayground { get; private set; }
+        public Playground ShootingPlayground { get; private set; }
 
-        private Playground currentPlayground;
         private IconButton btnAccept;
         private IconButton btnTurn;
+        private Boolean DiceWinnerChecked;
+
+        private Boolean incShootingPlayground;
+        private int PartnersPreDice;
    
         public FooterMenu FooterMenu { get; private set; }
 
-        public Playground Playground { get { return this.currentPlayground; } }
 
-        public Match(Int32 mid, JID own, JID partner)
+        public Match(String mid, JID own, JID partner)
         {
             this.MatchState = Enum.MatchState.ShipPlacement;
-                        
+            this.PartnerDice = -1;
+            this.OwnDice = -1;
+            this.PartnersPreDice = -1;
 
             this.MatchID = mid;
             this.OwnJID = own;
             this.PartnerJID = partner;
             this.Started = DateTime.Now;
             this.rnd = new Random(DateTime.Now.Millisecond);
-            this.currentPlayground = new Playground();
+        }
+
+        public void Initialize()
+        {
+            this.OwnPlayground = new Playground(1);
+            this.ShootingPlayground = new Playground(0.30f);
+            this.ShootingPlayground.Click += new EventHandler<EventArgs>(shootingPlayground_Click);
             InitializeShips();
             FooterMenu = new FooterMenu(DeviceCache.BelowGrid, DeviceCache.ScreenHeight - DeviceCache.BelowGrid);
 
             btnAccept = new IconButton(TextureManager.IconAccept, "Place", "btnPlace");
             btnTurn = new IconButton(TextureManager.IconTurn, "Turn", "btnTurn");
-           
+
             btnAccept.Visible = false;
             btnTurn.Visible = false;
 
@@ -59,6 +75,79 @@ namespace Schiffchen.Logic
 
             btnTurn.Click += new EventHandler<EventArgs>(btnTurn_Click);
             btnAccept.Click += new EventHandler<EventArgs>(btnAccept_Click);
+
+            AppCache.XmppManager.IncomingDiceroll += new EventHandler<RollingDiceEventArgs>(XmppManager_IncomingDiceroll);
+        }
+
+        void shootingPlayground_Click(object sender, EventArgs e)
+        {
+            if (this.MatchState == Enum.MatchState.Playing) {
+                incShootingPlayground = true;
+            }
+        }
+
+        void XmppManager_IncomingDiceroll(object sender, RollingDiceEventArgs e)
+        {
+            if (FooterMenu.Dices[1] != null)
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(delegate
+                        {
+                            FooterMenu.Dices[1].Roll(e.Value);
+                        }
+                );
+            }
+            else
+            {
+                this.PartnersPreDice = e.Value;               
+            }
+        }
+
+        private void FakeIncomingDiceroll()
+        {
+            FooterMenu.Dices[1].Roll(4);
+        }
+
+        void CheckDiceWinner()
+        {
+            if (PartnerDice != -1 && OwnDice != -1)
+            {
+                if (PartnerDice > OwnDice)
+                {
+                    FooterMenu.Dices[1].Blink(TextureManager.Green);
+                    FooterMenu.Dices[1].BlinkComplete +=new EventHandler<EventArgs>(Match_BlinkComplete);
+                    DiceWinnerChecked = true;
+                }
+                else if (PartnerDice < OwnDice)
+                {
+                    FooterMenu.Dices[0].Blink(TextureManager.Green);
+                    FooterMenu.Dices[0].BlinkComplete += new EventHandler<EventArgs>(Match_BlinkComplete);
+                    DiceWinnerChecked = true;                  
+                }
+                else
+                {
+                    FooterMenu.Dices[0].Blink(TextureManager.Yellow);
+                    FooterMenu.Dices[1].Blink(TextureManager.Yellow);
+                    DispatcherTimer resetDices = new DispatcherTimer();
+                    resetDices.Interval = new TimeSpan(0, 0, 2);
+                    resetDices.Tick += new EventHandler(resetDices_Tick);
+                    resetDices.Start();
+                }
+            }
+        }
+
+        void Match_BlinkComplete(object sender, EventArgs e)
+        {
+            this.FooterMenu.Dices[0] = null;
+            this.FooterMenu.Dices[1] = null;
+            this.MatchState = Enum.MatchState.Playing;
+        }
+
+        void resetDices_Tick(object sender, EventArgs e)
+        {
+            FooterMenu.Dices[0].ResetValue();
+            FooterMenu.Dices[1].ResetValue();
+            DispatcherTimer timer = (DispatcherTimer)sender;
+            timer.Stop();
         }
 
         void btnTurn_Click(object sender, EventArgs e)
@@ -77,26 +166,56 @@ namespace Schiffchen.Logic
             }
             if (areAllShipsPlaced())
             {
+                this.MatchState = Enum.MatchState.Dicing;
                 FooterMenu.RemoveAllButtons();
-                IconButton btnDice = new IconButton(TextureManager.IconAccept, "Roll Dice", "btnDice");
-                btnDice.Click += new EventHandler<EventArgs>(btnDice_Click);
-                FooterMenu.AddButton(btnDice);
+                Dice ownDice = new GameElemens.Dice(new Vector2(20, 10), "Your Dice");
+                ownDice.Click += new EventHandler<EventArgs>(ownDice_Click);
+                FooterMenu.Dices[0] = ownDice;
+
+                Dice partnersDice = new GameElemens.Dice(new Vector2(140, 10), "Partners Dice");
+                partnersDice.ReadOnly = true;
+                partnersDice.RollingFinish += new EventHandler<RollingDiceEventArgs>(partnersDice_RollingFinish);
+                FooterMenu.Dices[1] = partnersDice;
+
+                if (this.PartnersPreDice != -1)
+                {
+                    // Partner has alread rolled the dices
+                    Deployment.Current.Dispatcher.BeginInvoke(delegate
+                        {
+                            FooterMenu.Dices[1].Roll(this.PartnersPreDice);
+                        }
+                );
+                }
+
             }
         }
 
-        void btnDice_Click(object sender, EventArgs e)
+        void partnersDice_RollingFinish(object sender, RollingDiceEventArgs e)
         {
-            int dice = this.Dice();
+            this.PartnerDice = e.Value;
+            CheckDiceWinner();
+        }
+
+
+        void ownDice_Click(object sender, EventArgs e)
+        {
+            Dice dice = (Dice)sender;
+            dice.RollingFinish += new EventHandler<RollingDiceEventArgs>(dice_RollingFinish);
+            dice.Roll();
             
         }
 
-        private void SendDiceMessage(int dice)
+        void dice_RollingFinish(object sender, RollingDiceEventArgs e)
         {
-            Dictionary<string,object> dict = new Dictionary<string,object>();
-            dict.Add("dice", dice);
-            MatchMessage message = new MatchMessage(MatchAction.diceroll, dict);
-            AppCache.XmppManager.Client.SendRawXML(message.ToSendXML(this.OwnJID, this.PartnerJID));
+            this.OwnDice = e.Value;
+            Partner.Dice(e.Value);
+            CheckDiceWinner();
         }
+
+    
+
+
+        
 
         private Boolean areAllShipsPlaced()
         {
@@ -146,17 +265,20 @@ namespace Schiffchen.Logic
                     this.MatchState = Enum.MatchState.Dicing;
                 }
             }
+            if (this.MatchState == Enum.MatchState.Playing)
+            {
+                if (incShootingPlayground)
+                {
+                    this.ShootingPlayground.Increase();
+                }
+            }
         }
 
-        public Int32 Dice()
-        {
-            this.OwnDice = rnd.Next(1, 7);
-            return this.OwnDice;
-        }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            this.currentPlayground.Draw(spriteBatch);
+            this.OwnPlayground.Draw(spriteBatch);
+            this.ShootingPlayground.Draw(spriteBatch);
             FooterMenu.Draw(spriteBatch);
             foreach (Ship s in this.OwnShips)
             {

@@ -58,7 +58,6 @@ namespace Schiffchen.GameElemens
                 this.HitPoints.Add(i, false);
             }
 
-            this.scaleRate = calculateSizeRatio();
         }
 
         public Ship(JID owner, ShipType type)
@@ -81,8 +80,6 @@ namespace Schiffchen.GameElemens
                     break;
             }
             LoadTexture();
-
-            this.scaleRate = calculateSizeRatio();
 
             // Ship is not placed. We place it manually
             switch (type)
@@ -143,7 +140,7 @@ namespace Schiffchen.GameElemens
                         this.shipTexture = TextureManager.ShipAircraftcarrierH;
                     break;
             }
-            calculateSizeRatio();
+            this.scaleRate = calculateSizeRatio();
         }
 
         public void SetPosition(Vector2 p)
@@ -154,9 +151,9 @@ namespace Schiffchen.GameElemens
         private float calculateSizeRatio()
         {
             if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
-                return (float)DeviceCache.FieldSize.Width / this.shipTexture.Width;
+                return (float)AppCache.CurrentMatch.OwnPlayground.FieldSize.Width / this.shipTexture.Width;
             else
-                return (float)DeviceCache.FieldSize.Width / this.shipTexture.Height;
+                return (float)AppCache.CurrentMatch.OwnPlayground.FieldSize.Width / this.shipTexture.Height;
         }
 
         public void GlueToFields()
@@ -168,7 +165,7 @@ namespace Schiffchen.GameElemens
                     f.ReferencedShip = null;
                 }
             }
-            List<Field> fields = CollissionManager.GetFields(AppCache.CurrentMatch.Playground, this);
+            List<Field> fields = CollissionManager.GetFields(AppCache.CurrentMatch.OwnPlayground, this);
             if (fields != null)
             {
                 this.StartField = fields[0];

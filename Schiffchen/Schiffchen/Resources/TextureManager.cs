@@ -16,6 +16,9 @@ namespace Schiffchen.Resources
         public static Texture2D White;
         public static Texture2D Red;
         public static Texture2D Green;
+        public static Texture2D Gray;
+        public static Texture2D Yellow;
+        public static Texture2D DarkGray;
         public static Texture2D ShipAircraftcarrierV;
         public static Texture2D ShipBattleshipV;
         public static Texture2D ShipDestroyerV;
@@ -52,6 +55,13 @@ namespace Schiffchen.Resources
             Red.SetData(new[] { Color.Red });
             Green = new Texture2D(device, 1, 1);
             Green.SetData(new[] { Color.Green });
+
+            Gray = new Texture2D(device, 1, 1);
+            Gray.SetData(new[] { Color.Gray });
+            Yellow = new Texture2D(device, 1, 1);
+            Yellow.SetData(new[] { Color.Yellow });
+            DarkGray = new Texture2D(device, 1, 1);
+            DarkGray.SetData(new[] { Color.DarkGray });
         }
     }
 }

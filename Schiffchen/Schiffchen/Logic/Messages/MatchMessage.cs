@@ -20,6 +20,9 @@ namespace Schiffchen.Logic.Messages
         
         public Int32 MatchID;
         public Int32 Dice;
+        public Int32 X;
+        public Int32 Y;
+        public String Result;
 
         public MatchMessage(MatchAction action, Dictionary<string, object> dict) : base(Type.Match)
         {
@@ -29,6 +32,16 @@ namespace Schiffchen.Logic.Messages
                 case MatchAction.diceroll:
                     this.Dice = (Int32)dict["dice"];
                     break;
+                case MatchAction.shoot:
+                    this.X = (Int32)dict["X"];
+                    this.Y = (Int32)dict["Y"];
+                    break;
+                case MatchAction.shootresult:
+                    this.X = (Int32)dict["X"];
+                    this.Y = (Int32)dict["Y"];
+                    this.Result = (String)dict["result"];
+                    break;
+
             }
         }
 
@@ -38,7 +51,13 @@ namespace Schiffchen.Logic.Messages
             switch (Action) {
                 case MatchAction.diceroll:
                     s += "<diceroll dice=\"" + this.Dice + "\" />";
-                        break;              
+                        break; 
+                case MatchAction.shoot:
+                        s += "<shoot x=\"" + this.X + "\" y=\"" + this.Y + "\" />";
+                        break;
+                case MatchAction.shootresult:
+                    s += "<shoot x=\"" + this.X + "\" y=\"" + this.Y + "\" result=\"" + this.Result + "\" />";
+                        break;
                 default:
                     throw new Exception("This Match Message Type is not for sending!");
             }

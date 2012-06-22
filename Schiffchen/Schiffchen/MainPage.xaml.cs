@@ -47,7 +47,10 @@ namespace Schiffchen
         {
             if (cbAnonymous.IsChecked == true)
             {
-                MessageBox.Show("Not implemented!");
+                //MessageBox.Show("Not implemented!");
+                AppCache.XmppManager = new XMPPManager(tbJID.Text, tbPwd.Password, this);
+                Match m = new Match("123", new JID(tbJID.Text), new JID("gegnerfdgdfg@jabber.ccc.de"));
+                StartGame(m);
             }
             else
             {
@@ -77,12 +80,40 @@ namespace Schiffchen
 
         private void btnDirect_Click(object sender, RoutedEventArgs e)
         {
-            lblSearchState.Text = "Connecting to Matchmaker...";
+            if (String.IsNullOrWhiteSpace(tbPartnerJID.Text))
+            {
+                MessageBox.Show("Please enter the Jabber-ID of your game partner.", "Error", MessageBoxButton.OK);
+            }
+            else
+            {
+                try
+                {
+                    Match newMatch = new Match("1337", AppCache.CurrentMatch.OwnJID, new JID(tbPartnerJID.Text));
+                    StartGame(newMatch);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Please enter a valid Jabber-ID of your game partner.", "Error", MessageBoxButton.OK);
+                }                
+            }
         }
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            AppCache.XmppManager.RequestPlayerFromMatchmaker();
+            if (btnSearch.Content.Equals("Search Partner"))
+            {
+                ledWaitingState.Visibility = System.Windows.Visibility.Visible;
+                lblSearchState.Text = "Connecting to Matchmaker...";
+                btnSearch.Content = "Stop Search";
+                AppCache.XmppManager.RequestPlayerFromMatchmaker();
+            }
+            else
+            {
+                lblSearchState.Text = "";
+                ledWaitingState.Visibility = System.Windows.Visibility.Collapsed;
+                btnSearch.Content = "Search Partner";
+                AppCache.XmppManager.StopRequestPlayerFromMatchmaker();
+            }
         }
 
         public void StartGame(Match newMatch)

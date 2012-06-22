@@ -50,7 +50,7 @@ namespace Schiffchen.Logic
                                                 break;
                                             case "assign":
                                                 dictionary.Add("jid", new JID(reader.GetAttribute("jid")));
-                                                dictionary.Add("mid", Convert.ToInt32(reader.GetAttribute("mid")));
+                                                dictionary.Add("mid", reader.GetAttribute("mid"));
                                                 message = new QueuingMessage(Enum.QueueingAction.assign, dictionary);
                                                 break;
                                             case "assigned":
@@ -64,10 +64,29 @@ namespace Schiffchen.Logic
                                 }
                                 else if ((isBattleship = true) && reader.Name.ToLower().Equals("diceroll"))
                                 {
-                                    int dice = Convert.ToInt32(reader.GetAttribute("diceroll"));
+                                    int dice = Convert.ToInt32(reader.GetAttribute("dice"));
                                     Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
                                     dictionary.Add("dice", dice);
                                     MatchMessage message = new MatchMessage(Enum.MatchAction.diceroll, dictionary);
+                                    return message;
+                                }
+                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("shoot"))
+                                {
+                                    Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
+                                    int x = Convert.ToInt32(reader.GetAttribute("x"));
+                                    int y = Convert.ToInt32(reader.GetAttribute("y"));
+                                    string result = reader.GetAttribute("result");
+
+                                    dictionary.Add("x", x);
+                                    dictionary.Add("y", y);
+                                    Enum.MatchAction action = Enum.MatchAction.shoot;
+
+                                    if (!String.IsNullOrEmpty(result)) {
+                                        action = Enum.MatchAction.shootresult;
+                                        dictionary.Add("result", result);
+                                    }
+                                    
+                                    MatchMessage message = new MatchMessage(action, dictionary);
                                     return message;
                                 }
                                 break;
@@ -94,7 +113,7 @@ namespace Schiffchen.Logic
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return null;
             }

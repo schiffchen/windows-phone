@@ -48,7 +48,11 @@
                 <StackPanel>
                     <TextBlock Text="Matchmaker Connection:"  FontSize="32"></TextBlock>
                     <Button Content="Search Partner" Name="btnSearch" Click="btnSearch_Click"></Button>
-                    <TextBlock Name="lblSearchState" Text="" Margin="15,0"></TextBlock>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Fill="#FFCD1900" Height="32" VerticalAlignment="Center" Margin="10,0,20,0" Name="ledWaitingState" Visibility="Collapsed" Stroke="Black" StrokeThickness="1" Width="32" />
+                        <TextBlock Name="lblSearchState" Text="" ></TextBlock>
+                    </StackPanel>
                     <StackPanel Margin="0,150,0,0">
                         <TextBlock Text="Direct Connection:" FontSize="32"></TextBlock>
                         <TextBlock Height="30"  Name="textBlock4" Text="Jabber-ID of your partner"  />

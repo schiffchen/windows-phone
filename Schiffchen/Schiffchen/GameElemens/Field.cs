@@ -25,6 +25,12 @@ namespace Schiffchen.GameElemens
             this.Rectangle = new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(Size.Width), Convert.ToInt32(Size.Height));
         }
 
+        public void SetProperties(Vector2 pos, Size size) {
+            this.Position = pos;
+            this.Size = size;
+            this.Rectangle = new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(Size.Width), Convert.ToInt32(Size.Height));
+        }
+
         public Field()
         {
             this.backgroundColor = null;

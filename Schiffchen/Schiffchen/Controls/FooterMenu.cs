@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Schiffchen.Logic;
 using Schiffchen.Resources;
+using Schiffchen.GameElemens;
 
 namespace Schiffchen.Controls
 {
@@ -14,6 +15,7 @@ namespace Schiffchen.Controls
     {
         public Rectangle Rectangle { get; private set; }
         public IconButton[] Buttons;
+        public Dice[] Dices;
 
         private float alpha = 0.5f;
         private Color color;
@@ -24,6 +26,7 @@ namespace Schiffchen.Controls
             this.alpha = 0.5f;
             this.color = new Color(255,255,255) * alpha;
             Buttons = new IconButton[2];
+            Dices = new Dice[2];
         }
 
         public void AddButton(IconButton button)
@@ -80,9 +83,7 @@ namespace Schiffchen.Controls
             return null;
         }
 
-        public void Update()
-        {
-        }
+      
 
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -92,6 +93,13 @@ namespace Schiffchen.Controls
                 if (Buttons[i] != null)
                 {
                     Buttons[i].Draw(spriteBatch);
+                }
+            }
+            for (int i = 0; i < Buttons.Length; i++)
+            {
+                if (Dices[i] != null)
+                {
+                    Dices[i].Draw(spriteBatch);
                 }
             }
         }

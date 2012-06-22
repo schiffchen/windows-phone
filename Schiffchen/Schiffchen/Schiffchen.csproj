@@ -74,7 +74,9 @@
     <Compile Include="Controls\FooterMenu.cs" />
     <Compile Include="Controls\IconButton.cs" />
     <Compile Include="Controls\WatermarkedTextbox.cs" />
-    <Compile Include="Event\IconButtonEventArgs.cs" />
+    <Compile Include="Event\RollingDiceEventArgs.cs" />
+    <Compile Include="Event\ShootEventArgs.cs" />
+    <Compile Include="GameElemens\Dice.cs" />
     <Compile Include="Logic\CollissionManager.cs" />
     <Compile Include="Logic\DeviceCache.cs" />
     <Compile Include="GameElemens\Field.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Logic\Enum\MatchState.cs" />
     <Compile Include="Logic\Enum\MatchAction.cs" />
     <Compile Include="Logic\Enum\QueueingAction.cs" />
+    <Compile Include="Logic\Partner.cs" />
     <Compile Include="Logic\Match.cs" />
     <Compile Include="Logic\Matchmaker.cs" />
     <Compile Include="Logic\Messages\BattleshipMessage.cs" />

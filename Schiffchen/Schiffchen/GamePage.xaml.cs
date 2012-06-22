@@ -39,6 +39,7 @@ namespace Schiffchen
             timer.UpdateInterval = TimeSpan.FromTicks(333333);
             timer.Update += OnUpdate;
             timer.Draw += OnDraw;
+
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -54,7 +55,13 @@ namespace Schiffchen
             TextureManager.LoadContent(contentManager, SharedGraphicsDeviceManager.Current.GraphicsDevice);
             FontManager.LoadContent(contentManager);
             background = new TiledBackground(TextureManager.GameBackground, DeviceCache.ScreenWidth, DeviceCache.ScreenHeight);
-            AppCache.CurrentMatch = new Match(42, new System.Net.XMPP.JID("asd@asd.de"), new System.Net.XMPP.JID("qsd@qsd.de"));
+
+
+            if (AppCache.CurrentMatch != null)
+            {
+                AppCache.CurrentMatch.Initialize();
+            }
+
             TouchManager.SetGame();
             // Timer starten
             timer.Start();
@@ -85,7 +92,7 @@ namespace Schiffchen
             {
                 if (!AppCache.TouchedShip.IsPlaced)
                 {
-                    CollissionManager.HandleFieldCheck(AppCache.CurrentMatch.Playground, AppCache.TouchedShip);
+                    CollissionManager.HandleFieldCheck(AppCache.CurrentMatch.OwnPlayground, AppCache.TouchedShip);
                 }
             }
             AppCache.Update();

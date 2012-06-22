@@ -17,7 +17,7 @@ namespace Schiffchen.Logic.Messages
     {
         public QueueingAction Action;
         public JID JID;
-        public Int32 MatchID;
+        public String MatchID;
         public Int32 ID;
 
         public QueuingMessage(QueueingAction action, Dictionary<string, object> dict) : base(Type.Queueing)
@@ -32,7 +32,7 @@ namespace Schiffchen.Logic.Messages
                 case QueueingAction.assign:
                 case QueueingAction.assigned:
                     this.JID = (JID)dict["jid"];
-                    this.MatchID = (Int32)dict["mid"];
+                    this.MatchID = (String)dict["mid"];
                     break;
             }
         }

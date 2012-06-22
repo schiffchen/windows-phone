@@ -2,7 +2,7 @@
 using System.Net;
 using System.Windows;
 using System.Collections.Generic;
-
+using Schiffchen.Event;
 
 using System.Windows.Shapes;
 using System.Net.XMPP;
@@ -18,6 +18,8 @@ namespace Schiffchen.Logic
         private Int32 queueID;
         private DispatcherTimer pingTimer;
         private Boolean QueuingProcess;
+        public event EventHandler<RollingDiceEventArgs> IncomingDiceroll;
+        public event EventHandler<ShootEventArgs> IncomingShot;
 
         public XMPPClient Client
         {
@@ -160,7 +162,7 @@ namespace Schiffchen.Logic
                 if (bMessage is QueuingMessage)
                 {
                     Match m = null;
-
+                    System.Windows.Media.SolidColorBrush brush = null;
                     QueuingMessage qMessage = (QueuingMessage)bMessage;
                     String s = "";
                     if (qMessage.Action== Enum.QueueingAction.success)
@@ -168,10 +170,13 @@ namespace Schiffchen.Logic
 
                         s = "Searching partner. Please wait...";
                         this.queueID = qMessage.ID;
+                        brush = AppCache.cGreen;
+                        
                     }
                     else if (qMessage.Action == Enum.QueueingAction.ping)
                     {
                         s = "Searching partner. Please wait...";
+                        brush = AppCache.cGreen;
                     }
                     else if (qMessage.Action == Enum.QueueingAction.assign)
                     {
@@ -181,15 +186,18 @@ namespace Schiffchen.Logic
                             m = new Match(qMessage.MatchID, this.OwnID, qMessage.JID);
                         }
                         s = "Assigned with partner!";
+                        brush = AppCache.cGreen;
+                       
                         
                     }
                         mainPage.Dispatcher.BeginInvoke(delegate
                     {
                         mainPage.lblSearchState.Text = s;
                         if (m != null)
-                        {
                             mainPage.StartGame(m);
-                        }
+
+                        if (brush != null)
+                            mainPage.ledWaitingState.Fill = brush; 
                     });
                 }
                 else if (bMessage is MatchMessage)
@@ -200,13 +208,21 @@ namespace Schiffchen.Logic
                         case Enum.MatchAction.diceroll:
                             if (AppCache.CurrentMatch != null)
                             {
-                                AppCache.CurrentMatch.PartnerDice = mMessage.Dice;
+                                this.OnIncomingDiceroll(new RollingDiceEventArgs(mMessage.Dice));
+                            }
+                            break;
+                        case Enum.MatchAction.shoot:
+                            if (AppCache.CurrentMatch != null)
+                            {
+                                this.OnIncomingShot(new ShootEventArgs(mMessage.X, mMessage.Y));
                             }
                             break;
                     }
                 }
             }
         }
+
+
 
         void XmppClient_OnXMLSent(XMPPClient client, string strXML)
         {
@@ -228,16 +244,53 @@ namespace Schiffchen.Logic
             pingTimer.Start();
         }
 
+        public void StopRequestPlayerFromMatchmaker()
+        {
+            QueuingProcess = false;
+            this.queueID = -1;
+            pingTimer.Stop();
+        }
+
         void pingTimer_Tick(object sender, EventArgs e)
         {
             if (QueuingProcess)
             {
                 Matchmaker.Ping(this);
+                mainPage.Dispatcher.BeginInvoke(delegate
+                {
+                    mainPage.ledWaitingState.Fill = AppCache.cYellow;
+                });
             }
             else
             {
                 pingTimer.Stop();
             }
         }
+
+        #region Own Events
+        protected virtual void OnIncomingDiceroll(RollingDiceEventArgs e)
+        {
+            EventHandler<RollingDiceEventArgs> handler = IncomingDiceroll;
+
+            // Event will be null if there are no subscribers
+            if (handler != null)
+            {
+                // Use the () operator to raise the event.
+                handler(this, e);
+            }
+        }
+
+        protected virtual void OnIncomingShot(ShootEventArgs e)
+        {
+            EventHandler<ShootEventArgs> handler = IncomingShot;
+
+            // Event will be null if there are no subscribers
+            if (handler != null)
+            {
+                // Use the () operator to raise the event.
+                handler(this, e);
+            }
+        }
+        #endregion
     }
 }

@@ -139,6 +139,16 @@ namespace Schiffchen.Logic
                                 b.CheckClick(gs);
                         }
 
+                        for (int i = 0; i < AppCache.CurrentMatch.FooterMenu.Dices.Length; i++)
+                        {
+                            if (AppCache.CurrentMatch.FooterMenu.Dices[i] != null)
+                            {
+                                AppCache.CurrentMatch.FooterMenu.Dices[i].CheckClick(gs);
+                            }
+                        }
+                        AppCache.CurrentMatch.OwnPlayground.CheckClick(gs);
+                        AppCache.CurrentMatch.ShootingPlayground.CheckClick(gs);
+
                         #region Ships
                         HandleShipSelection(gs);
                         #endregion

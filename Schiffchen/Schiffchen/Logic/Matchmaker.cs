@@ -38,11 +38,11 @@ namespace Schiffchen.Logic
             Manager.Client.SendRawXML(message.ToSendXML(Manager.OwnID, MatchmakerJID));
         }
 
-        public static void Assigned(XMPPManager Manager, JID partner, Int32 mid)
+        public static void Assigned(XMPPManager Manager, JID partner, String mid)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
             dict.Add("mid", mid);
-            dict.Add("jid", partner.FullJID);
+            dict.Add("jid", partner);
 
             QueuingMessage message = new QueuingMessage(Enum.QueueingAction.assigned, dict);
             Manager.Client.SendRawXML(message.ToSendXML(Manager.OwnID, MatchmakerJID));
