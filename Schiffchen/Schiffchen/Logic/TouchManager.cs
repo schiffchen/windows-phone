@@ -123,6 +123,7 @@ namespace Schiffchen.Logic
                                     if (s.isTouched)
                                     {
                                         s.GlueToFields();
+                                        AppCache.CurrentMatch.OwnPlayground.Refresh();
                                         s.isTouched = false;
                                         VibrationManager.Vibration.Start(new TimeSpan(0, 0, 0, 0, 100));
                                     }
@@ -152,12 +153,15 @@ namespace Schiffchen.Logic
                         #region Ships
                         HandleShipSelection(gs);
                         #endregion
+
                     #endregion
                             break;
                 }
 
             }
         }
+
+     
 
     }
 }

@@ -24,7 +24,7 @@ namespace Schiffchen.Logic
         public DateTime Started { get; private set; }
         public Ship[] OwnShips { get; private set; }
         public Ship[] PartnerShips { get; private set; }
-        public JID CurrentTurn { get; private set; }
+        public Boolean IsMyTurn { get; private set; }
         public Int32 OwnDice { get; private set; }
         public Int32 PartnerDice { get; set; }
         public MatchState MatchState { get; private set; }
@@ -32,12 +32,13 @@ namespace Schiffchen.Logic
         public Playground OwnPlayground { get; private set; }
         public Playground ShootingPlayground { get; private set; }
 
+        private Field selectedField;
         private IconButton btnAccept;
         private IconButton btnTurn;
         private Boolean DiceWinnerChecked;
 
-        private Boolean incShootingPlayground;
         private int PartnersPreDice;
+        private DispatcherTimer pingTimer;
    
         public FooterMenu FooterMenu { get; private set; }
 
@@ -58,9 +59,12 @@ namespace Schiffchen.Logic
 
         public void Initialize()
         {
-            this.OwnPlayground = new Playground(1);
-            this.ShootingPlayground = new Playground(0.30f);
+            this.OwnPlayground = new Playground(PlaygroundMode.Normal);
+            this.ShootingPlayground = new Playground(PlaygroundMode.Minimap);
             this.ShootingPlayground.Click += new EventHandler<EventArgs>(shootingPlayground_Click);
+            this.OwnPlayground.Click += new EventHandler<EventArgs>(OwnPlayground_Click);
+            this.ShootingPlayground.TargetSelected += new EventHandler<ShootEventArgs>(ShootingPlayground_TargetSelected);
+            AppCache.XmppManager.IncomingPing += new EventHandler<MessageEventArgs>(XmppManager_IncomingPing);
             InitializeShips();
             FooterMenu = new FooterMenu(DeviceCache.BelowGrid, DeviceCache.ScreenHeight - DeviceCache.BelowGrid);
 
@@ -77,12 +81,107 @@ namespace Schiffchen.Logic
             btnAccept.Click += new EventHandler<EventArgs>(btnAccept_Click);
 
             AppCache.XmppManager.IncomingDiceroll += new EventHandler<RollingDiceEventArgs>(XmppManager_IncomingDiceroll);
+            AppCache.XmppManager.IncomingShot += new EventHandler<ShootEventArgs>(XmppManager_IncomingShot);
+            AppCache.XmppManager.IncomingShotResult += new EventHandler<ShootEventArgs>(XmppManager_IncomingShotResult);
+
+            pingTimer = new DispatcherTimer();
+            pingTimer.Interval = new TimeSpan(0, 0, 10);
+            pingTimer.Tick += new EventHandler(pingTimer_Tick);
+            pingTimer.Start();
+        }
+
+      
+        void XmppManager_IncomingPing(object sender, MessageEventArgs e)
+        {
+            Partner.LastPing = DateTime.Now;
+        }
+
+        void pingTimer_Tick(object sender, EventArgs e)
+        {
+            if (DateTime.Now - Partner.LastPing > new TimeSpan(0, 0, 15))
+            {
+                Partner.OnlineState = PartnerState.Waiting;
+            }
+            else if (DateTime.Now - Partner.LastPing > new TimeSpan(0, 0, 40))
+            {
+                Partner.OnlineState = PartnerState.Offline;
+            }
+            else
+            {
+                Partner.OnlineState = PartnerState.Online;
+            }
+            Partner.Ping();
+        }
+
+        void XmppManager_IncomingShot(object sender, ShootEventArgs e)
+        {
+            if (!this.IsMyTurn)
+            {
+
+                if (AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip == null)
+                {
+                    AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
+                    SoundManager.SoundWater.Play();
+                }
+                else
+                {
+                    AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+                    SoundManager.SoundExplosion.Play();
+                    //AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip.H
+                }
+                MessageBox.Show("Incoming Shot: X=" + e.X + ", Y=" + e.Y);
+                
+            }
+        }
+
+        void XmppManager_IncomingShotResult(object sender, ShootEventArgs e)
+        {
+            if (e.Result.ToLower().Equals("water"))
+            {
+                SoundManager.SoundWater.Play();
+                AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
+            }
+            else
+            {
+                SoundManager.SoundExplosion.Play();
+                AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+            }
+        }
+
+
+        void ShootingPlayground_TargetSelected(object sender, ShootEventArgs e)
+        {
+            Playground pgSender = (Playground)sender;
+            pgSender.ResetFieldColors();
+            Field selectedField = pgSender.fields[e.Y - 1, e.X - 1];
+            selectedField.SetColor(FieldColor.Red);
+            IconButton attack = new IconButton(TextureManager.IconAttack, "Attack", "btnAttack");
+            attack.Click += new EventHandler<EventArgs>(attack_Click);
+            FooterMenu.RemoveButton("btnAttack");
+            FooterMenu.AddButton(attack);
+            this.selectedField = selectedField;
+        }
+
+        void attack_Click(object sender, EventArgs e)
+        {
+            Partner.Shoot(selectedField.X, selectedField.Y);
+            btnAccept.Visible = false;
+        }
+
+        void OwnPlayground_Click(object sender, EventArgs e)
+        {
+            if (this.MatchState == Enum.MatchState.Playing && this.OwnPlayground.PlaygroundMode == PlaygroundMode.Minimap)
+            {
+                this.OwnPlayground.IncreaseToMain();
+                this.ShootingPlayground.ReduceToMinimap();
+            }
         }
 
         void shootingPlayground_Click(object sender, EventArgs e)
         {
-            if (this.MatchState == Enum.MatchState.Playing) {
-                incShootingPlayground = true;
+            if (this.MatchState == Enum.MatchState.Playing && this.ShootingPlayground.PlaygroundMode == PlaygroundMode.Minimap ) {
+                this.ShootingPlayground.IncreaseToMain();
+                this.OwnPlayground.ReduceToMinimap();
             }
         }
 
@@ -104,7 +203,7 @@ namespace Schiffchen.Logic
 
         private void FakeIncomingDiceroll()
         {
-            FooterMenu.Dices[1].Roll(4);
+            FooterMenu.Dices[1].Roll(1);
         }
 
         void CheckDiceWinner()
@@ -116,12 +215,14 @@ namespace Schiffchen.Logic
                     FooterMenu.Dices[1].Blink(TextureManager.Green);
                     FooterMenu.Dices[1].BlinkComplete +=new EventHandler<EventArgs>(Match_BlinkComplete);
                     DiceWinnerChecked = true;
+                    this.IsMyTurn = false;
                 }
                 else if (PartnerDice < OwnDice)
                 {
                     FooterMenu.Dices[0].Blink(TextureManager.Green);
                     FooterMenu.Dices[0].BlinkComplete += new EventHandler<EventArgs>(Match_BlinkComplete);
-                    DiceWinnerChecked = true;                  
+                    DiceWinnerChecked = true;
+                    this.IsMyTurn = true;
                 }
                 else
                 {
@@ -202,13 +303,14 @@ namespace Schiffchen.Logic
             Dice dice = (Dice)sender;
             dice.RollingFinish += new EventHandler<RollingDiceEventArgs>(dice_RollingFinish);
             dice.Roll();
+            //this.FakeIncomingDiceroll();
             
         }
 
         void dice_RollingFinish(object sender, RollingDiceEventArgs e)
         {
             this.OwnDice = e.Value;
-            Partner.Dice(e.Value);
+            Partner.Dice(e.Value);           
             CheckDiceWinner();
         }
 
@@ -267,10 +369,8 @@ namespace Schiffchen.Logic
             }
             if (this.MatchState == Enum.MatchState.Playing)
             {
-                if (incShootingPlayground)
-                {
-                    this.ShootingPlayground.Increase();
-                }
+                OwnPlayground.Update();
+                ShootingPlayground.Update();
             }
         }
 

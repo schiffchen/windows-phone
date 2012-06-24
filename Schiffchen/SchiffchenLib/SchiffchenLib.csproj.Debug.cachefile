@@ -16,3 +16,11 @@ Content\font\infoFont.xnb
 Content\font\menuFont.xnb
 Content\font\buttonFont.xnb
 Content\font\diceFont.xnb
+Content\icons\hit.xnb
+Content\icons\water.xnb
+Content\icons\attack.xnb
+Content\icons\offline.xnb
+Content\icons\online.xnb
+Content\icons\waiting.xnb
+Content\sounds\explosion.xnb
+Content\sounds\splash.xnb

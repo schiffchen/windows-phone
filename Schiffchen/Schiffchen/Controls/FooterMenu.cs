@@ -62,8 +62,8 @@ namespace Schiffchen.Controls
         public void RemoveButton(String id)
         {
             for (int i = 0; i < Buttons.Length; i++)
-            {
-                if (Buttons[i].ID.Equals(id))
+            {                
+                if (Buttons[i] != null && Buttons[i].ID.Equals(id))
                 {
                     Buttons[i].DoRemove();
                     Buttons[i] = null;

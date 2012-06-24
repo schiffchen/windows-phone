@@ -27,7 +27,10 @@ namespace Schiffchen.Logic.Messages
             {
                 case QueueingAction.success:
                 case QueueingAction.ping:
-                    this.ID = (Int32)dict["id"];
+                    if (dict.ContainsKey("id"))
+                    {
+                        this.ID = (Int32)dict["id"];
+                    }
                     break;
                 case QueueingAction.assign:
                 case QueueingAction.assigned:
@@ -35,6 +38,11 @@ namespace Schiffchen.Logic.Messages
                     this.MatchID = (String)dict["mid"];
                     break;
             }
+        }
+
+        public String ToSendXML()
+        {
+            return this.ToSendXML(this.From, this.To);
         }
 
         public String ToSendXML(JID from, JID to)

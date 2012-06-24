@@ -10,6 +10,14 @@ namespace Schiffchen.Event
         {
             X = x;
             Y = y;
+            Result = null;
+        }
+
+        public ShootEventArgs(int x, int y, string result)
+        {
+            X = x;
+            Y = y;
+            Result = result;
         }
 
         public int X
@@ -19,6 +27,12 @@ namespace Schiffchen.Event
         }
 
         public int Y
+        {
+            get;
+            private set;
+        }
+
+        public string Result
         {
             get;
             private set;

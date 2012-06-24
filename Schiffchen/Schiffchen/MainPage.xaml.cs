@@ -106,6 +106,7 @@ namespace Schiffchen
                 lblSearchState.Text = "Connecting to Matchmaker...";
                 btnSearch.Content = "Stop Search";
                 AppCache.XmppManager.RequestPlayerFromMatchmaker();
+                AppCache.XmppManager.IncomingPing += new EventHandler<Event.MessageEventArgs>(XmppManager_IncomingPing);
             }
             else
             {
@@ -113,8 +114,19 @@ namespace Schiffchen
                 ledWaitingState.Visibility = System.Windows.Visibility.Collapsed;
                 btnSearch.Content = "Search Partner";
                 AppCache.XmppManager.StopRequestPlayerFromMatchmaker();
+                AppCache.XmppManager.IncomingPing -= XmppManager_IncomingPing;
             }
         }
+
+        void XmppManager_IncomingPing(object sender, Event.MessageEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(delegate
+            {
+                this.lblSearchState.Text = "Searching partner. Please wait...";
+                this.ledWaitingState.Fill = AppCache.cGreen;
+            });
+        }
+       
 
         public void StartGame(Match newMatch)
         {

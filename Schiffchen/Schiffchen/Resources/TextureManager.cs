@@ -27,10 +27,17 @@ namespace Schiffchen.Resources
         public static Texture2D ShipBattleshipH;
         public static Texture2D ShipDestroyerH;
         public static Texture2D ShipSubmarineH;
+        public static Texture2D FieldHit;
+        public static Texture2D FieldWater;
 
         public static Texture2D IconAccept;
         public static Texture2D IconTurn;
         public static Texture2D IconCancel;
+        public static Texture2D IconAttack;
+
+        public static Texture2D SymbolOnline;
+        public static Texture2D SymbolWaiting;
+        public static Texture2D SymbolOffline;
 
         public static void LoadContent(Microsoft.Xna.Framework.Content.ContentManager Content, GraphicsDevice device)
         {
@@ -47,6 +54,13 @@ namespace Schiffchen.Resources
             IconAccept = Content.Load<Texture2D>("icons\\accept");
             IconCancel = Content.Load<Texture2D>("icons\\cancel");
             IconTurn = Content.Load<Texture2D>("icons\\turn");
+            IconAttack = Content.Load<Texture2D>("icons\\attack");
+            SymbolOffline = Content.Load<Texture2D>("icons\\offline");
+            SymbolWaiting = Content.Load<Texture2D>("icons\\waiting");
+            SymbolOnline = Content.Load<Texture2D>("icons\\online");
+           
+            FieldHit = Content.Load<Texture2D>("icons\\hit");
+            FieldWater = Content.Load<Texture2D>("icons\\water");
             Black = new Texture2D(device, 1, 1);
             Black.SetData(new[] { Color.Black });
             White = new Texture2D(device, 1, 1);

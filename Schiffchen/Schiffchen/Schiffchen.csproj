@@ -74,6 +74,7 @@
     <Compile Include="Controls\FooterMenu.cs" />
     <Compile Include="Controls\IconButton.cs" />
     <Compile Include="Controls\WatermarkedTextbox.cs" />
+    <Compile Include="Event\MessageEventArgs.cs" />
     <Compile Include="Event\RollingDiceEventArgs.cs" />
     <Compile Include="Event\ShootEventArgs.cs" />
     <Compile Include="GameElemens\Dice.cs" />
@@ -88,6 +89,10 @@
     </Compile>
     <Compile Include="Logic\AppCache.cs" />
     <Compile Include="Logic\Enum\FieldColor.cs" />
+    <Compile Include="Logic\Enum\FieldState.cs" />
+    <Compile Include="Logic\Enum\PartnerState.cs" />
+    <Compile Include="Logic\Enum\PlaygroundType.cs" />
+    <Compile Include="Logic\Enum\PlaygroundMode.cs" />
     <Compile Include="Logic\Enum\MatchState.cs" />
     <Compile Include="Logic\Enum\MatchAction.cs" />
     <Compile Include="Logic\Enum\QueueingAction.cs" />
@@ -109,6 +114,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AppServiceProvider.cs" />
     <Compile Include="Resources\FontManager.cs" />
+    <Compile Include="Resources\SoundManager.cs" />
     <Compile Include="Resources\TextureManager.cs" />
   </ItemGroup>
   <ItemGroup>

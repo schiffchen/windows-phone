@@ -45,7 +45,11 @@ namespace Schiffchen.Logic
                                                 message = new QueuingMessage(Enum.QueueingAction.success, dictionary);
                                                 break;
                                             case "ping":
-                                                dictionary.Add("id", Convert.ToInt32(reader.GetAttribute("id")));
+                                                string id = reader.GetAttribute("id");
+                                                if (!String.IsNullOrEmpty(id))
+                                                {
+                                                    dictionary.Add("id", Convert.ToInt32(id));
+                                                }
                                                 message = new QueuingMessage(Enum.QueueingAction.ping, dictionary);
                                                 break;
                                             case "assign":
@@ -67,7 +71,7 @@ namespace Schiffchen.Logic
                                     int dice = Convert.ToInt32(reader.GetAttribute("dice"));
                                     Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
                                     dictionary.Add("dice", dice);
-                                    MatchMessage message = new MatchMessage(Enum.MatchAction.diceroll, dictionary);
+                                    MatchMessage message = new MatchMessage(Enum.MatchAction.Diceroll, dictionary);
                                     return message;
                                 }
                                 else if ((isBattleship = true) && reader.Name.ToLower().Equals("shoot"))
@@ -79,10 +83,10 @@ namespace Schiffchen.Logic
 
                                     dictionary.Add("x", x);
                                     dictionary.Add("y", y);
-                                    Enum.MatchAction action = Enum.MatchAction.shoot;
+                                    Enum.MatchAction action = Enum.MatchAction.Shot;
 
                                     if (!String.IsNullOrEmpty(result)) {
-                                        action = Enum.MatchAction.shootresult;
+                                        action = Enum.MatchAction.Shotresult;
                                         dictionary.Add("result", result);
                                     }
                                     

@@ -7,6 +7,8 @@ using System.Windows;
 using Schiffchen.GameElemens;
 using Microsoft.Xna.Framework.Input.Touch;
 using Schiffchen.Logic;
+using Schiffchen.Logic.Enum;
+using Schiffchen.Event;
 
 namespace Schiffchen.GameElemens
 {
@@ -14,11 +16,12 @@ namespace Schiffchen.GameElemens
     {
         public static int PLAYGROUND_SIZE = 10;
         public Size FieldSize;
-        public Boolean IsBig { get; private set; }
         public event EventHandler<EventArgs> Click;
+        public event EventHandler<ShootEventArgs> TargetSelected;
         public Rectangle Rectangle { get; private set; }
 
-        private Boolean isInResizeProcess;
+        public PlaygroundMode PlaygroundMode { get; private set; }
+        public PlaygroundType PlaygroundType { get; private set; }
 
         public Field[,] fields;
 
@@ -30,37 +33,74 @@ namespace Schiffchen.GameElemens
         private double FieldHeight;
         private double GridTop;
         private float SizeRatio;
+        private Boolean isIncreaseToMain;
+        private Boolean isReduceToMinimap;
         #endregion
 
 
-        public Playground(float sizeRatio)
+        public Playground(PlaygroundMode mode)
         {
-            if (sizeRatio == 1f)
+            this.PlaygroundMode = mode;
+            if (mode == Logic.Enum.PlaygroundMode.Minimap)
             {
-                this.IsBig = true;
+                this.PlaygroundType = Logic.Enum.PlaygroundType.ShootingView;
+                SizeRatio = 0.3f;
             }
-            else
+            else if (mode == Logic.Enum.PlaygroundMode.Normal)
             {
-                this.IsBig = false;
+                this.PlaygroundType = Logic.Enum.PlaygroundType.ShipView;
+                SizeRatio = 1f;
             }
-            this.SizeRatio = sizeRatio;
+            
             CalculateSizes();
             CalculateFields();
-
         }
 
-        public void Increase()
+        public void Refresh()
         {
-            this.SizeRatio += 0.1f;
+            foreach (Ship s in AppCache.CurrentMatch.OwnShips)
+            {
+                s.GlueToFields();
+            }
+            foreach (Field f in this.fields)
+            {
+                if (f.ReferencedShip == null)
+                {
+                    f.ResetColor();
+                }                
+            }
+        }
+
+        private void Increase()
+        {
+            this.SizeRatio = MathHelper.Clamp(this.SizeRatio + 0.1f, 0.3f, 1f);
             this.CalculateSizes();
             this.CalculateFields();
         }
 
-        public void Reduce()
+        private void Reduce()
         {
-            this.SizeRatio -= 0.1f;
+            this.SizeRatio = MathHelper.Clamp(this.SizeRatio - 0.1f, 0.3f, 1f);
             this.CalculateSizes();
             this.CalculateFields();
+        }
+
+        public void ReduceToMinimap()
+        {
+            this.isReduceToMinimap = true;
+        }
+
+        public void IncreaseToMain()
+        {
+            this.isIncreaseToMain = true;
+        }
+
+        public void ResetFieldColors()
+        {
+            foreach (Field f in this.fields)
+            {
+                f.ResetColor();
+            }
         }
 
         public void CalculateFields()
@@ -79,18 +119,26 @@ namespace Schiffchen.GameElemens
                     Vector2 pos = new Vector2((float)(GridLeft + (c * FieldWidth)), (float)(GridTop + (r * FieldHeight)));
                     if (fields[r, c] == null)
                     {
-                        fields[r, c] = new Field(pos, new System.Windows.Size(FieldWidth, FieldHeight));
+                        fields[r, c] = new Field(pos, new System.Windows.Size(FieldWidth, FieldHeight), c + 1, r + 1);
                     }
                     else
                     {
                         fields[r, c].SetProperties(pos, new System.Windows.Size(FieldWidth, FieldHeight));
+                        if (fields[r, c].ReferencedShip != null)
+                        {
+                            fields[r, c].ReferencedShip.UpdatePosition();
+                        }
                     }
 
                     if (firstStarted)
                     {
-                        if (r == PLAYGROUND_SIZE - 1 && c == 0)
+                        if (r == 0 && c == PLAYGROUND_SIZE - 1)
                         {
-                            if (this.IsBig)
+                            DeviceCache.RightOfMinimap = new Vector2((float)(pos.X + FieldWidth + 20), pos.Y);
+                        }
+                        else if (r == PLAYGROUND_SIZE - 1 && c == 0)
+                        {
+                            if (this.PlaygroundMode == Logic.Enum.PlaygroundMode.Normal)
                             {
                                 DeviceCache.BelowGrid = Convert.ToInt32(pos.Y + FieldHeight + 20);
                             }
@@ -100,20 +148,32 @@ namespace Schiffchen.GameElemens
                             }
                         }
                     }
-
                 }
             }
         }
 
         public void CheckClick(GestureSample gs)
         {
-            if (!this.IsBig)
+            if (this.PlaygroundMode == Logic.Enum.PlaygroundMode.Minimap)
             {
                 int x = Convert.ToInt32(gs.Position.X);
                 int y = Convert.ToInt32(gs.Position.Y);
                 if (this.Rectangle.Contains(x, y))
                 {
                     this.OnClick(new EventArgs());
+                }
+            }
+            if (AppCache.CurrentMatch.MatchState == MatchState.Playing && AppCache.CurrentMatch.IsMyTurn)
+            {
+                if (this.PlaygroundMode == PlaygroundMode.Normal)
+                {
+                    foreach (Field f in this.fields)
+                    {
+                        if (f.IsClicked(gs))
+                        {
+                            OnTargetSelected(new ShootEventArgs(f.X, f.Y));
+                        }
+                    }
                 }
             }
         }
@@ -140,6 +200,30 @@ namespace Schiffchen.GameElemens
             this.Rectangle = new Microsoft.Xna.Framework.Rectangle(Convert.ToInt32(GridLeft), Convert.ToInt32(GridTop), Convert.ToInt32(GridWidth), Convert.ToInt32(GridHeight));
         }
 
+        public void Update()
+        {
+            if (isIncreaseToMain)
+            {
+                this.isReduceToMinimap = false;
+                this.Increase();
+                if (this.SizeRatio == 1f)
+                {
+                    this.isIncreaseToMain = false;
+                    this.PlaygroundMode = Logic.Enum.PlaygroundMode.Normal;
+                }
+            }
+            if (isReduceToMinimap)
+            {
+                this.isIncreaseToMain = false;
+                this.Reduce();
+                if (this.SizeRatio == 0.3f)
+                {
+                    this.isReduceToMinimap = false;
+                    this.PlaygroundMode = Logic.Enum.PlaygroundMode.Minimap;
+                }
+            }
+        }
+
         public void Draw(SpriteBatch spriteBatch)
         {
             for (int r = 0; r < PLAYGROUND_SIZE; r++)
@@ -154,6 +238,18 @@ namespace Schiffchen.GameElemens
         protected virtual void OnClick(EventArgs e)
         {
             EventHandler<EventArgs> handler = Click;
+
+            // Event will be null if there are no subscribers
+            if (handler != null)
+            {
+                // Use the () operator to raise the event.
+                handler(this, e);
+            }
+        }
+
+        protected virtual void OnTargetSelected(ShootEventArgs e)
+        {
+            EventHandler<ShootEventArgs> handler = TargetSelected;
 
             // Event will be null if there are no subscribers
             if (handler != null)

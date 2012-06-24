@@ -29,33 +29,38 @@ namespace Schiffchen.Logic.Messages
             this.Action = action;
             switch (action)
             {
-                case MatchAction.diceroll:
+                case MatchAction.Diceroll:
                     this.Dice = (Int32)dict["dice"];
                     break;
-                case MatchAction.shoot:
-                    this.X = (Int32)dict["X"];
-                    this.Y = (Int32)dict["Y"];
+                case MatchAction.Shot:
+                    this.X = (Int32)dict["x"];
+                    this.Y = (Int32)dict["y"];
                     break;
-                case MatchAction.shootresult:
-                    this.X = (Int32)dict["X"];
-                    this.Y = (Int32)dict["Y"];
+                case MatchAction.Shotresult:
+                    this.X = (Int32)dict["x"];
+                    this.Y = (Int32)dict["y"];
                     this.Result = (String)dict["result"];
                     break;
 
             }
         }
 
+        public String ToSendXML()
+        {
+            return this.ToSendXML(this.From, this.To);            
+        }
+
         public String ToSendXML(JID from, JID to)
         {
             String s = "<message from=\"" + from.FullJID + "\" id=\"" + Guid.NewGuid() + "\" to=\"" + to.FullJID + "\" type=\"normal\">\n<battleship xmlns=\"http://battleship.me/xmlns/\">";
             switch (Action) {
-                case MatchAction.diceroll:
+                case MatchAction.Diceroll:
                     s += "<diceroll dice=\"" + this.Dice + "\" />";
                         break; 
-                case MatchAction.shoot:
+                case MatchAction.Shot:
                         s += "<shoot x=\"" + this.X + "\" y=\"" + this.Y + "\" />";
                         break;
-                case MatchAction.shootresult:
+                case MatchAction.Shotresult:
                     s += "<shoot x=\"" + this.X + "\" y=\"" + this.Y + "\" result=\"" + this.Result + "\" />";
                         break;
                 default:

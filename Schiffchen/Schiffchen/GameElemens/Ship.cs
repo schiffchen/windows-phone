@@ -40,6 +40,14 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        public void UpdatePosition()
+        {
+            if (this.StartField != null)
+            {
+                this.Position = StartField.Position;
+            }
+        }
+
         public Ship(JID owner, ShipType type, System.Windows.Controls.Orientation or, Field targetField)
         {
             this.Owner = owner;
@@ -180,12 +188,19 @@ namespace Schiffchen.GameElemens
 
         public void FinishPlacement()
         {
-            this.OverlayColor = Color.White;
-            this.IsPlaced = true;
-            AppCache.ActivePlacementShip = null;
-            foreach (Field f in this.Fields)
+            if (this.Fields != null)
             {
-                f.ResetColor();
+                this.OverlayColor = Color.White;
+                this.IsPlaced = true;
+                AppCache.ActivePlacementShip = null;
+                foreach (Field f in this.Fields)
+                {
+                    f.ResetColor();
+                }
+            }
+            else
+            {
+                AppCache.CurrentMatch.OwnPlayground.Refresh();
             }
         }
 
@@ -201,6 +216,7 @@ namespace Schiffchen.GameElemens
             }
             LoadTexture();
             GlueToFields();
+            AppCache.CurrentMatch.OwnPlayground.Refresh();
         }
 
         public void StartMovement()
