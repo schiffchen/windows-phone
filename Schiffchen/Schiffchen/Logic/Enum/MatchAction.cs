@@ -6,5 +6,7 @@ namespace Schiffchen.Logic.Enum
         Diceroll,
         Shot     ,
         Shotresult,
+        Ping,
+        Gamestate
     }
 }

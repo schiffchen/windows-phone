@@ -115,6 +115,31 @@ namespace Schiffchen.GameElemens
             
         }
 
+        public void HitOnField(Field f)
+        {
+            for (int i = 0; i < this.Fields.Count; i++)
+            {
+                if (this.Fields[i].Equals(f))
+                {
+                    this.HitPoints[i] = true;
+                }
+            }
+            CheckState();
+        }
+
+        private void CheckState()
+        {
+            Boolean destroyed = true;
+            for (int i = 0; i < this.HitPoints.Count; i++)
+            {
+                if (!this.HitPoints[i])
+                {
+                    destroyed = false;
+                }
+            }
+            this.IsDestroyed = destroyed;
+        }
+
         private void LoadTexture()
         {
             switch (this.ShipType)

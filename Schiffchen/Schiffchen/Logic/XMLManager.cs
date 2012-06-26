@@ -17,6 +17,8 @@ namespace Schiffchen.Logic
                 using (XmlReader reader = XmlReader.Create(new StringReader(strXML)))
                 {
                     Boolean isBattleship = false;
+                    Boolean isShoot = false;
+                    MatchMessage ShootMessage = null;
 
                     while (reader.Read())
                     {
@@ -76,6 +78,8 @@ namespace Schiffchen.Logic
                                 }
                                 else if ((isBattleship = true) && reader.Name.ToLower().Equals("shoot"))
                                 {
+                                    isShoot = true;
+                                    
                                     Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
                                     int x = Convert.ToInt32(reader.GetAttribute("x"));
                                     int y = Convert.ToInt32(reader.GetAttribute("y"));
@@ -91,9 +95,51 @@ namespace Schiffchen.Logic
                                     }
                                     
                                     MatchMessage message = new MatchMessage(action, dictionary);
+                                    ShootMessage = message;
+                                }
+                                else if ((isShoot = true) && reader.Name.ToLower().Equals("ship"))
+                                {
+
+                                    if (ShootMessage != null)
+                                    {
+                                        ShipInfo shipInfo = new ShipInfo();
+                                        shipInfo.X = Convert.ToInt32(reader.GetAttribute("x"));
+                                        shipInfo.Y = Convert.ToInt32(reader.GetAttribute("y"));
+                                        shipInfo.Destroyed = Convert.ToBoolean(reader.GetAttribute("destroyed"));
+                                        shipInfo.Size = Convert.ToInt32(reader.GetAttribute("size"));
+                                        String orientation = reader.GetAttribute("orientation");
+
+                                        if (orientation.ToLower().Equals("horizontal"))
+                                            shipInfo.Orientation = System.Windows.Controls.Orientation.Horizontal;
+                                        else
+                                            shipInfo.Orientation = System.Windows.Controls.Orientation.Vertical;
+
+                                        ShootMessage.ShipInfo = shipInfo;
+
+                                        return ShootMessage;                                        
+                                    }
+                                }
+                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("gamestate"))
+                                {
+                                    Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
+                                    
+                                    dictionary.Add("state", reader.GetAttribute("state"));
+                                    dictionary.Add("looser", reader.GetAttribute("looser"));
+                                    
+                                    MatchMessage message = new MatchMessage(Enum.MatchAction.Gamestate, dictionary);
+                                    return message;
+                                }
+                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("ping"))
+                                {
+                                    Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
+                                    
+                                    Enum.MatchAction action = Enum.MatchAction.Ping;
+
+                                    MatchMessage message = new MatchMessage(action, dictionary);
                                     return message;
                                 }
                                 break;
+
                             case XmlNodeType.Text:
 
                                 break;
@@ -107,6 +153,10 @@ namespace Schiffchen.Logic
                                 if (reader.Name.ToLower().Equals("battleship"))
                                 {
                                     isBattleship = false;
+                                }
+                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("shoot"))
+                                {
+                                    isShoot = false;
                                 }
                                 else if ((isBattleship = true) && reader.Name.ToLower().Equals("queueing"))
                                 {

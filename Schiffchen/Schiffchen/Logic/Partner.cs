@@ -41,9 +41,8 @@ namespace Schiffchen.Logic
             try
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>();
-                dict.Add("id", AppCache.XmppManager.QueueID);
 
-                QueuingMessage message = new QueuingMessage(Enum.QueueingAction.ping, dict);
+                MatchMessage message = new MatchMessage(MatchAction.Ping, dict);
                 AppCache.XmppManager.Client.SendRawXML(message.ToSendXML(AppCache.XmppManager.OwnID, AppCache.CurrentMatch.PartnerJID));
             }
             catch (Exception e)
@@ -71,7 +70,26 @@ namespace Schiffchen.Logic
            
         }
 
-        public static void TransferShotResult(int x, int y, Boolean isHit)
+        public static void SendGamestate(String looser)
+        {
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            dict.Add("state", "end");
+            dict.Add("looser", looser);
+
+            MatchMessage message = new MatchMessage(MatchAction.Gamestate, dict);
+
+            try
+            {
+                AppCache.XmppManager.Client.SendRawXML(message.ToSendXML(AppCache.XmppManager.OwnID, AppCache.CurrentMatch.PartnerJID));
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+
+        }
+
+        public static void TransferShotResult(int x, int y, Boolean isHit, ShipInfo shipInfo)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
             dict.Add("x", x);
@@ -83,8 +101,14 @@ namespace Schiffchen.Logic
             else
             {
                 dict.Add("result", "water");
-            }
+            }            
+
             MatchMessage message = new MatchMessage(MatchAction.Shotresult, dict);
+
+            if (shipInfo != null)
+            {
+                message.ShipInfo = shipInfo;
+            }
             try
             {
                 AppCache.XmppManager.Client.SendRawXML(message.ToSendXML(AppCache.XmppManager.OwnID, AppCache.CurrentMatch.PartnerJID));

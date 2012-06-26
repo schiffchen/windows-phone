@@ -16,6 +16,9 @@ using System.Windows.Threading;
 
 namespace Schiffchen.Logic
 {
+    /// <summary>
+    /// The class handles all ingame match logic and holds all data of the current game
+    /// </summary>
     public class Match
     {
         public String MatchID { get; private set; }
@@ -32,6 +35,9 @@ namespace Schiffchen.Logic
         public Playground OwnPlayground { get; private set; }
         public Playground ShootingPlayground { get; private set; }
 
+        private Shot SendedShot;
+        private Boolean GamestateSended;
+
         private Field selectedField;
         private IconButton btnAccept;
         private IconButton btnTurn;
@@ -42,14 +48,20 @@ namespace Schiffchen.Logic
    
         public FooterMenu FooterMenu { get; private set; }
 
-
+        /// <summary>
+        /// Creates a new match instance
+        /// </summary>
+        /// <param name="mid">The ID of the match</param>
+        /// <param name="own">The own Jabber-ID</param>
+        /// <param name="partner">The Jabber-ID of the game partner</param>
         public Match(String mid, JID own, JID partner)
         {
             this.MatchState = Enum.MatchState.ShipPlacement;
             this.PartnerDice = -1;
             this.OwnDice = -1;
             this.PartnersPreDice = -1;
-
+            this.SendedShot = null;
+            this.GamestateSended = false;
             this.MatchID = mid;
             this.OwnJID = own;
             this.PartnerJID = partner;
@@ -57,6 +69,10 @@ namespace Schiffchen.Logic
             this.rnd = new Random(DateTime.Now.Millisecond);
         }
 
+        /// <summary>
+        /// Initializes all complex objects. Because it handles content and textures, this method must not be called before the content
+        /// of the static manager are loaded!
+        /// </summary>
         public void Initialize()
         {
             this.OwnPlayground = new Playground(PlaygroundMode.Normal);
@@ -64,7 +80,7 @@ namespace Schiffchen.Logic
             this.ShootingPlayground.Click += new EventHandler<EventArgs>(shootingPlayground_Click);
             this.OwnPlayground.Click += new EventHandler<EventArgs>(OwnPlayground_Click);
             this.ShootingPlayground.TargetSelected += new EventHandler<ShootEventArgs>(ShootingPlayground_TargetSelected);
-            AppCache.XmppManager.IncomingPing += new EventHandler<MessageEventArgs>(XmppManager_IncomingPing);
+            AppCache.XmppManager.IncomingMatchPing += new EventHandler<MessageEventArgs>(XmppManager_IncomingPing);
             InitializeShips();
             FooterMenu = new FooterMenu(DeviceCache.BelowGrid, DeviceCache.ScreenHeight - DeviceCache.BelowGrid);
 
@@ -83,6 +99,7 @@ namespace Schiffchen.Logic
             AppCache.XmppManager.IncomingDiceroll += new EventHandler<RollingDiceEventArgs>(XmppManager_IncomingDiceroll);
             AppCache.XmppManager.IncomingShot += new EventHandler<ShootEventArgs>(XmppManager_IncomingShot);
             AppCache.XmppManager.IncomingShotResult += new EventHandler<ShootEventArgs>(XmppManager_IncomingShotResult);
+            AppCache.XmppManager.IncomingGamestate += new EventHandler<MessageEventArgs>(XmppManager_IncomingGamestate);
 
             pingTimer = new DispatcherTimer();
             pingTimer.Interval = new TimeSpan(0, 0, 10);
@@ -90,21 +107,83 @@ namespace Schiffchen.Logic
             pingTimer.Start();
         }
 
+        /// <summary>
+        /// Is called on receiving a message with the gamestate
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The message event arguments</param>
+        void XmppManager_IncomingGamestate(object sender, MessageEventArgs e)
+        {
+            if (!this.GamestateSended)
+            {
+                JID looser = getLooser();
+                if (looser != null)
+                {
+                    Partner.SendGamestate(looser.BareJID);
+                    this.GamestateSended = true;
+                }                
+            }
+        }
+
+        /// <summary>
+        /// Iterates through all own and enemy ships and determines, if someone has won the game.        
+        /// </summary>
+        /// <returns>A JID object, which represents the looser. If it is null, there is no winner at the moment.</returns>
+        private JID getLooser()
+        {
+            Boolean allOwnDestroyed = true;
+            Boolean allPartnerDestroyed = true;
+            foreach (Ship s in this.OwnShips)
+            {
+                if (s != null && !s.IsDestroyed)
+                    allOwnDestroyed = false;
+            }
+            foreach (Ship s in this.PartnerShips)
+            {
+                if (s != null && !s.IsDestroyed)
+                    allPartnerDestroyed = false;
+            }
+            if (allOwnDestroyed)
+            {
+                return OwnJID;
+            }
+            else if (allPartnerDestroyed)
+            {
+                return PartnerJID;
+            }
+            else
+            {
+                return null;
+            }
+        }
       
+        /// <summary>
+        /// Is called on receiving a message with a ping of the partner
+        /// Sets the LastPing-Object to Now.
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The message event arguments</param>
         void XmppManager_IncomingPing(object sender, MessageEventArgs e)
         {
             Partner.LastPing = DateTime.Now;
         }
 
+        /// <summary>
+        /// Is called, when the ping timer ticks.
+        /// Determines, how the online state of the game partner should be displayed.
+        /// Sends a ping message to the game partner.
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The event arguments</param>
         void pingTimer_Tick(object sender, EventArgs e)
-        {
-            if (DateTime.Now - Partner.LastPing > new TimeSpan(0, 0, 15))
-            {
-                Partner.OnlineState = PartnerState.Waiting;
-            }
-            else if (DateTime.Now - Partner.LastPing > new TimeSpan(0, 0, 40))
+        {            
+            if (DateTime.Now - Partner.LastPing > new TimeSpan(0, 0, 40))
             {
                 Partner.OnlineState = PartnerState.Offline;
+            }
+            else if (DateTime.Now - Partner.LastPing > new TimeSpan(0, 0, 15))
+            {
+                Partner.OnlineState = PartnerState.Waiting;
             }
             else
             {
@@ -113,6 +192,11 @@ namespace Schiffchen.Logic
             Partner.Ping();
         }
 
+        /// <summary>
+        /// Is called on receiving a message with a shot from the partner
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The shoot event arguments</param>
         void XmppManager_IncomingShot(object sender, ShootEventArgs e)
         {
             if (!this.IsMyTurn)
@@ -122,66 +206,126 @@ namespace Schiffchen.Logic
                 {
                     AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
                     SoundManager.SoundWater.Play();
+                    Partner.TransferShotResult(e.X, e.Y, false, null);
                 }
                 else
                 {
                     AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+                    Ship sh = AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip;
+                    sh.HitOnField(AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1]);
                     SoundManager.SoundExplosion.Play();
+                    ShipInfo shipInfo = null;
+                    if (sh.IsDestroyed)
+                    {
+                        shipInfo = new ShipInfo();
+                        shipInfo.X = sh.StartField.X;
+                        shipInfo.Y = sh.StartField.Y;
+                        shipInfo.Size = sh.Size;
+                        shipInfo.Orientation = sh.Orientation;
+                    }
+
+                    Partner.TransferShotResult(e.X, e.Y, true, shipInfo);
                     //AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip.H
                 }
-                MessageBox.Show("Incoming Shot: X=" + e.X + ", Y=" + e.Y);
-                
+                this.IsMyTurn = true;
+                this.switchToTargetMode();
+
+                // Lookup, if someone has won or lost
+                JID looser = getLooser();
+                if (looser != null && !GamestateSended)
+                {
+                    Partner.SendGamestate(looser.BareJID);
+                    this.GamestateSended = true;
+                }        
             }
         }
 
         void XmppManager_IncomingShotResult(object sender, ShootEventArgs e)
         {
-            if (e.Result.ToLower().Equals("water"))
+            if (e.X == SendedShot.X && e.Y == SendedShot.Y)
             {
-                SoundManager.SoundWater.Play();
-                AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
+                if (e.Result.ToLower().Equals("water"))
+                {
+                    SoundManager.SoundWater.Play();
+                    AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
+                }
+                else
+                {
+                    SoundManager.SoundExplosion.Play();
+                    AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+                }               
             }
             else
             {
-                SoundManager.SoundExplosion.Play();
-                AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+                MessageBox.Show("Warning: Coordinates of sended shot and received shot result are different!");
             }
+            this.SendedShot = null;
+            FooterMenu.RemoveButton("btnAttack");
+            this.IsMyTurn = false;
+            this.switchToShipviewerMode();
+
+            // Lookup, if someone has won or lost
+            JID looser = getLooser();
+            if (looser != null && !GamestateSended)
+            {
+                Partner.SendGamestate(looser.BareJID);
+                this.GamestateSended = true;
+            }    
         }
 
 
         void ShootingPlayground_TargetSelected(object sender, ShootEventArgs e)
         {
-            Playground pgSender = (Playground)sender;
-            pgSender.ResetFieldColors();
-            Field selectedField = pgSender.fields[e.Y - 1, e.X - 1];
-            selectedField.SetColor(FieldColor.Red);
-            IconButton attack = new IconButton(TextureManager.IconAttack, "Attack", "btnAttack");
-            attack.Click += new EventHandler<EventArgs>(attack_Click);
-            FooterMenu.RemoveButton("btnAttack");
-            FooterMenu.AddButton(attack);
-            this.selectedField = selectedField;
+            if (SendedShot == null)
+            {
+                Playground pgSender = (Playground)sender;
+                pgSender.ResetFieldColors();
+                Field selectedField = pgSender.fields[e.Y - 1, e.X - 1];
+                selectedField.SetColor(FieldColor.Red);
+                IconButton attack = new IconButton(TextureManager.IconAttack, "Attack", "btnAttack");
+                attack.Click += new EventHandler<EventArgs>(attack_Click);
+                FooterMenu.RemoveButton("btnAttack");
+                FooterMenu.AddButton(attack);
+                this.selectedField = selectedField;
+            }
         }
 
         void attack_Click(object sender, EventArgs e)
         {
-            Partner.Shoot(selectedField.X, selectedField.Y);
-            btnAccept.Visible = false;
+            if (this.SendedShot == null)
+            {
+                IconButton btnAttack = (IconButton)sender;
+                btnAttack.Icon = TextureManager.IconAttackSW;
+                Partner.Shoot(selectedField.X, selectedField.Y);
+                this.SendedShot = new GameElemens.Shot(selectedField.X, selectedField.Y);
+            }
         }
 
         void OwnPlayground_Click(object sender, EventArgs e)
+        {
+            switchToShipviewerMode();
+        }
+
+        void shootingPlayground_Click(object sender, EventArgs e)
+        {
+            switchToTargetMode();
+        }
+
+        private void switchToTargetMode()
+        {
+            if (this.MatchState == Enum.MatchState.Playing && this.ShootingPlayground.PlaygroundMode == PlaygroundMode.Minimap)
+            {
+                this.ShootingPlayground.IncreaseToMain();
+                this.OwnPlayground.ReduceToMinimap();
+            }
+        }
+
+        private void switchToShipviewerMode()
         {
             if (this.MatchState == Enum.MatchState.Playing && this.OwnPlayground.PlaygroundMode == PlaygroundMode.Minimap)
             {
                 this.OwnPlayground.IncreaseToMain();
                 this.ShootingPlayground.ReduceToMinimap();
-            }
-        }
-
-        void shootingPlayground_Click(object sender, EventArgs e)
-        {
-            if (this.MatchState == Enum.MatchState.Playing && this.ShootingPlayground.PlaygroundMode == PlaygroundMode.Minimap ) {
-                this.ShootingPlayground.IncreaseToMain();
-                this.OwnPlayground.ReduceToMinimap();
             }
         }
 
@@ -223,6 +367,7 @@ namespace Schiffchen.Logic
                     FooterMenu.Dices[0].BlinkComplete += new EventHandler<EventArgs>(Match_BlinkComplete);
                     DiceWinnerChecked = true;
                     this.IsMyTurn = true;
+                    this.switchToTargetMode();
                 }
                 else
                 {

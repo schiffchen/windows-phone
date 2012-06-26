@@ -19,8 +19,10 @@ namespace Schiffchen.Logic
         private DispatcherTimer pingTimer;
         private Boolean QueuingProcess;
         public event EventHandler<RollingDiceEventArgs> IncomingDiceroll;
-        public event EventHandler<MessageEventArgs> IncomingPing;
+        public event EventHandler<MessageEventArgs> IncomingQueuingPing;
+        public event EventHandler<MessageEventArgs> IncomingMatchPing;
         public event EventHandler<ShootEventArgs> IncomingShot;
+        public event EventHandler<MessageEventArgs> IncomingGamestate;
         public event EventHandler<ShootEventArgs> IncomingShotResult;
 
         public XMPPClient Client
@@ -177,7 +179,7 @@ namespace Schiffchen.Logic
                     }
                     else if (qMessage.Action == Enum.QueueingAction.ping)
                     {
-                        OnIncomingPing(new MessageEventArgs(qMessage));                           
+                        OnIncomingQueuingPing(new MessageEventArgs(qMessage));                           
                     }
                     else if (qMessage.Action == Enum.QueueingAction.assign)
                     {
@@ -222,6 +224,18 @@ namespace Schiffchen.Logic
                             if (AppCache.CurrentMatch != null)
                             {
                                 this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result));
+                            }
+                            break;
+                        case Enum.MatchAction.Ping:
+                            if (AppCache.CurrentMatch != null)
+                            {
+                                this.OnIncomingMatchPing(new MessageEventArgs(mMessage));
+                            }
+                            break;
+                        case Enum.MatchAction.Gamestate:
+                            if (AppCache.CurrentMatch != null)
+                            {
+                                this.OnIncomingGamestate(new MessageEventArgs(mMessage));
                             }
                             break;
                     }
@@ -298,9 +312,31 @@ namespace Schiffchen.Logic
                 handler(this, e);
             }
         }
-        protected virtual void OnIncomingPing(MessageEventArgs e)
+        protected virtual void OnIncomingGamestate(MessageEventArgs e)
         {
-            EventHandler<MessageEventArgs> handler = IncomingPing;
+            EventHandler<MessageEventArgs> handler = IncomingGamestate;
+
+            // Event will be null if there are no subscribers
+            if (handler != null)
+            {
+                // Use the () operator to raise the event.
+                handler(this, e);
+            }
+        }
+        protected virtual void OnIncomingQueuingPing(MessageEventArgs e)
+        {
+            EventHandler<MessageEventArgs> handler = IncomingQueuingPing;
+
+            // Event will be null if there are no subscribers
+            if (handler != null)
+            {
+                // Use the () operator to raise the event.
+                handler(this, e);
+            }
+        }
+        protected virtual void OnIncomingMatchPing(MessageEventArgs e)
+        {
+            EventHandler<MessageEventArgs> handler = IncomingMatchPing;
 
             // Event will be null if there are no subscribers
             if (handler != null)
