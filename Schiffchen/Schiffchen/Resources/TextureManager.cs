@@ -34,6 +34,7 @@ namespace Schiffchen.Resources
         public static Texture2D IconTurn;
         public static Texture2D IconCancel;
         public static Texture2D IconAttack;
+        public static Texture2D IconAttackSW;
 
         public static Texture2D SymbolOnline;
         public static Texture2D SymbolWaiting;
@@ -55,6 +56,7 @@ namespace Schiffchen.Resources
             IconCancel = Content.Load<Texture2D>("icons\\cancel");
             IconTurn = Content.Load<Texture2D>("icons\\turn");
             IconAttack = Content.Load<Texture2D>("icons\\attack");
+            IconAttackSW = Content.Load<Texture2D>("icons\\attackDisabled");
             SymbolOffline = Content.Load<Texture2D>("icons\\offline");
             SymbolWaiting = Content.Load<Texture2D>("icons\\waiting");
             SymbolOnline = Content.Load<Texture2D>("icons\\online");
