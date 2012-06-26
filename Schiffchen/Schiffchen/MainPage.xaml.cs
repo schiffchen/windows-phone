@@ -150,10 +150,10 @@ namespace Schiffchen
             {
                 try
                 {
-                    Match newMatch = new Match("1337", AppCache.CurrentMatch.OwnJID, new JID(tbPartnerJID.Text));
+                    Match newMatch = new Match("1337", AppCache.XmppManager.OwnID, new JID(tbPartnerJID.Text));
                     StartGame(newMatch);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     MessageBox.Show("Please enter a valid Jabber-ID of your game partner.", "Error", MessageBoxButton.OK);
                 }
@@ -192,7 +192,7 @@ namespace Schiffchen
         /// <param name="sender">The sender</param>
         /// <param name="e">The message event arguments</param>
         void XmppManager_IncomingPing(object sender, Event.MessageEventArgs e)
-        {
+        {            
             this.Dispatcher.BeginInvoke(delegate
             {
                 this.lblSearchState.Text = "Searching partner. Please wait...";

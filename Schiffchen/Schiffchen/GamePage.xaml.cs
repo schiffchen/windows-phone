@@ -63,6 +63,7 @@ namespace Schiffchen
             DeviceCache.ScreenHeight = SharedGraphicsDeviceManager.Current.GraphicsDevice.Viewport.Height;
             TextureManager.LoadContent(contentManager, SharedGraphicsDeviceManager.Current.GraphicsDevice);
             FontManager.LoadContent(contentManager);
+            SoundManager.LoadContent(contentManager);
             background = new TiledBackground(TextureManager.GameBackground, DeviceCache.ScreenWidth, DeviceCache.ScreenHeight);
 
 

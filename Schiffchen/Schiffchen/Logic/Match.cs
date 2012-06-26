@@ -186,7 +186,7 @@ namespace Schiffchen.Logic
         }
 
         /// <summary>
-        /// Checks, whon won the dice roll phase
+        /// Checks, who won the dice roll phase
         /// </summary>
         private void CheckDiceWinner()
         {
@@ -207,7 +207,6 @@ namespace Schiffchen.Logic
                     FooterMenu.Dices[0].BlinkComplete += new EventHandler<EventArgs>(Match_BlinkComplete);
                     DiceWinnerChecked = true;
                     this.IsMyTurn = true;
-                    this.switchToTargetMode();
                 }
                 else
                 {
@@ -225,26 +224,77 @@ namespace Schiffchen.Logic
         /// <summary>
         /// Reduces the own ship playground to minimap and increases the shooting playground for targeting
         /// </summary>
-        private void switchToTargetMode()
+        private void switchToTargetMode(Boolean instant)
         {
-            if (this.MatchState == Enum.MatchState.Playing && this.ShootingPlayground.PlaygroundMode == PlaygroundMode.Minimap)
+            if (instant)
             {
-                this.ShootingPlayground.IncreaseToMain();
-                this.OwnPlayground.ReduceToMinimap();
+                if (this.MatchState == Enum.MatchState.Playing && this.ShootingPlayground.PlaygroundMode == PlaygroundMode.Minimap)
+                {
+                    this.ShootingPlayground.IncreaseToMain();
+                    this.OwnPlayground.ReduceToMinimap();
+                }
             }
+            else
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(delegate
+                {
+                    DispatcherTimer switch2sToTarget = new DispatcherTimer();
+                    switch2sToTarget.Interval = new TimeSpan(0, 0, 2);
+                    switch2sToTarget.Tick += new EventHandler(switch2sToTarget_Tick);
+                    switch2sToTarget.Start();
+                });
+            }
+        }
+
+        /// <summary>
+        /// Reduces the own ship playground to minimap and increases the shooting playground for targeting
+        /// </summary>
+        /// <param name="sender">The timer</param>
+        /// <param name="e">The event arguments</param>
+        void switch2sToTarget_Tick(object sender, EventArgs e)
+        {
+            switchToTargetMode(true);
+            DispatcherTimer switch2sToTarget = (DispatcherTimer)sender;
+            switch2sToTarget.Stop();
+        }
+
+        /// <summary>
+        /// Starts the 2-Seconds-Timer to change the current map
+        /// </summary>
+        private void switchToShipviewerMode(Boolean instant)
+        {
+            if (instant)
+            {
+                if (this.MatchState == Enum.MatchState.Playing && this.OwnPlayground.PlaygroundMode == PlaygroundMode.Minimap)
+                {
+                    this.OwnPlayground.IncreaseToMain();
+                    this.ShootingPlayground.ReduceToMinimap();
+                }
+            }
+            else
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(delegate
+                {
+                    DispatcherTimer switch2sToViewer = new DispatcherTimer();
+                    switch2sToViewer.Interval = new TimeSpan(0, 0, 2);
+                    switch2sToViewer.Tick += new EventHandler(switch2sToViewer_Tick);
+                    switch2sToViewer.Start();
+                });
+            }            
         }
 
         /// <summary>
         /// Reduces the shooting playground to minimap and increases the own ship playground for viewing the ships and shots of the enemy
         /// </summary>
-        private void switchToShipviewerMode()
+        /// <param name="sender">The timer</param>
+        /// <param name="e">The event arguments</param>
+        void switch2sToViewer_Tick(object sender, EventArgs e)
         {
-            if (this.MatchState == Enum.MatchState.Playing && this.OwnPlayground.PlaygroundMode == PlaygroundMode.Minimap)
-            {
-                this.OwnPlayground.IncreaseToMain();
-                this.ShootingPlayground.ReduceToMinimap();
-            }
+            this.switchToShipviewerMode(true);
+            DispatcherTimer switch2sToViewer = (DispatcherTimer)sender;
+            switch2sToViewer.Stop();
         }
+
         #endregion
 
         #region Events
@@ -284,6 +334,8 @@ namespace Schiffchen.Logic
             this.FooterMenu.Dices[0] = null;
             this.FooterMenu.Dices[1] = null;
             this.MatchState = Enum.MatchState.Playing;
+            if (this.IsMyTurn)
+                switchToTargetMode(false);
         }
 
         /// <summary>
@@ -295,6 +347,8 @@ namespace Schiffchen.Logic
         {
             FooterMenu.Dices[0].ResetValue();
             FooterMenu.Dices[1].ResetValue();
+            this.OwnDice = -1;
+            this.PartnerDice = -1;
             DispatcherTimer timer = (DispatcherTimer)sender;
             timer.Stop();
         }
@@ -393,7 +447,6 @@ namespace Schiffchen.Logic
             dice.RollingFinish += new EventHandler<RollingDiceEventArgs>(dice_RollingFinish);
             dice.Roll();
             //this.FakeIncomingDiceroll();
-
         }
 
         /// <summary>
@@ -466,6 +519,8 @@ namespace Schiffchen.Logic
                 {
                     // Hitted a ship
                     AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+                    
+                    /// Hier kracht es noch! Es ist kein Schiff referenziert!!
                     Ship sh = AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip;
                     sh.HitOnField(AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1]);
                     SoundManager.SoundExplosion.Play();
@@ -483,7 +538,7 @@ namespace Schiffchen.Logic
                     //AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip.H
                 }
                 this.IsMyTurn = true;
-                this.switchToTargetMode();
+                this.switchToTargetMode(false);
 
                 // Lookup, if someone has won or lost
                 JID looser = getLooser();
@@ -525,10 +580,11 @@ namespace Schiffchen.Logic
             {
                 MessageBox.Show("Warning: Coordinates of sended shot and received shot result are different!");
             }
+            AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ResetColor();
             this.SendedShot = null;
             FooterMenu.RemoveButton("btnAttack");
             this.IsMyTurn = false;
-            this.switchToShipviewerMode();
+            this.switchToShipviewerMode(false);
 
             // Lookup, if someone has won or lost
             JID looser = getLooser();
@@ -572,8 +628,8 @@ namespace Schiffchen.Logic
             {
                 IconButton btnAttack = (IconButton)sender;
                 btnAttack.Icon = TextureManager.IconAttackSW;
-                Partner.Shoot(selectedField.X, selectedField.Y);
                 this.SendedShot = new GameElemens.Shot(selectedField.X, selectedField.Y);
+                Partner.Shoot(selectedField.X, selectedField.Y);                
             }
         }
 
@@ -584,7 +640,7 @@ namespace Schiffchen.Logic
         /// <param name="e">The event arguments</param>
         void OwnPlayground_Click(object sender, EventArgs e)
         {
-            switchToShipviewerMode();
+            switchToShipviewerMode(true);
         }
 
         /// <summary>
@@ -594,7 +650,7 @@ namespace Schiffchen.Logic
         /// <param name="e">The event arguments</param>
         void shootingPlayground_Click(object sender, EventArgs e)
         {
-            switchToTargetMode();
+            switchToTargetMode(true);
         }
 
         #endregion

@@ -65,33 +65,38 @@ namespace Schiffchen.Logic
         {
             #region GameInfo
 
-            if (AppCache.CurrentMatch!= null) {
+            if (AppCache.CurrentMatch != null)
+            {
+                // Displays the online state of the game partner
+                Texture2D stateTexture = TextureManager.SymbolWaiting;
+                switch (Partner.OnlineState)
+                {
+                    case Enum.PartnerState.Online:
+                        stateTexture = TextureManager.SymbolOnline;
+                        break;
+                    case Enum.PartnerState.Waiting:
+                        stateTexture = TextureManager.SymbolWaiting;
+                        break;
+                    case Enum.PartnerState.Offline:
+                        stateTexture = TextureManager.SymbolOffline;
+                        break;
+                }
+                spriteBatch.Draw(stateTexture, new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y), null, Microsoft.Xna.Framework.Color.White, 0f, new Vector2(0, ((0.25f * stateTexture.Height) / 2)), 0.25f, SpriteEffects.None, 1);
+                spriteBatch.DrawString(FontManager.GameFont, AppCache.CurrentMatch.PartnerJID.BareJID, new Vector2(DeviceCache.RightOfMinimap.X + 36, DeviceCache.RightOfMinimap.Y), Microsoft.Xna.Framework.Color.White);
+
+
                 switch (AppCache.CurrentMatch.MatchState)
                 {
                     case Enum.MatchState.ShipPlacement:
-                        spriteBatch.DrawString(FontManager.GameFont, "Place your ships, by moving\n them to the playground", DeviceCache.RightOfMinimap, Microsoft.Xna.Framework.Color.White);
+                        spriteBatch.DrawString(FontManager.GameFont, "Place your ships, by moving\n them to the playground", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.White);
                         break;
                     case Enum.MatchState.Dicing:
-                        spriteBatch.DrawString(FontManager.GameFont, "Roll the dice to determine,\n who begins", DeviceCache.RightOfMinimap, Microsoft.Xna.Framework.Color.White);
+                        spriteBatch.DrawString(FontManager.GameFont, "Roll the dice to determine,\n who begins", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.White);
                         break;
-                    case Enum.MatchState.Playing:
-                        switch (Partner.OnlineState)
-                        {
-                            case Enum.PartnerState.Online:
-                                spriteBatch.Draw(TextureManager.SymbolOnline, new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y), Microsoft.Xna.Framework.Color.White);
-                                break;
-                            case Enum.PartnerState.Waiting:
-                                spriteBatch.Draw(TextureManager.SymbolWaiting, new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y), Microsoft.Xna.Framework.Color.White);
-                                break;
-                            case Enum.PartnerState.Offline:
-                                spriteBatch.Draw(TextureManager.SymbolOffline, new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y), Microsoft.Xna.Framework.Color.White);
-                                break;
-                        }
-                            spriteBatch.DrawString(FontManager.GameFont, AppCache.CurrentMatch.PartnerJID.BareJID, new Vector2(DeviceCache.RightOfMinimap.X + 36, DeviceCache.RightOfMinimap.Y), Microsoft.Xna.Framework.Color.White);
-
+                    case Enum.MatchState.Playing:                        
                         if (AppCache.CurrentMatch.IsMyTurn)
-                        {                            
-                            spriteBatch.DrawString(FontManager.InfoFont, "Your Turn!", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y+50), Microsoft.Xna.Framework.Color.LightBlue);
+                        {
+                            spriteBatch.DrawString(FontManager.InfoFont, "Your Turn!", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.LightBlue);
                         }
                         else
                         {

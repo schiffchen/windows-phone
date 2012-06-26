@@ -124,7 +124,7 @@ namespace Schiffchen.GameElemens
         /// <param name="gs">The given GestureSample</param>
         public void CheckClick(GestureSample gs)
         {
-            if (!this.ReadOnly)
+            if (!this.ReadOnly && this.Value.Equals("?"))
             {
                 int x = Convert.ToInt32(gs.Position.X);
                 int y = Convert.ToInt32(gs.Position.Y);
@@ -160,7 +160,7 @@ namespace Schiffchen.GameElemens
             blinkCounter++;
             if (blinkCounter > 5)
             {
-                blinkTimer.Stop();
+                blinkTimer.Stop();                
                 blinkState = false;
                 this.OnBlinkCompleted(new EventArgs());
             }

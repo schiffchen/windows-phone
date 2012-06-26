@@ -26,6 +26,7 @@ namespace Schiffchen.Logic
                 {
                     Boolean isBattleship = false;
                     Boolean isShoot = false;
+
                     MatchMessage ShootMessage = null;
 
                     while (reader.Read())
@@ -107,7 +108,6 @@ namespace Schiffchen.Logic
                                 }
                                 else if ((isShoot) && reader.Name.ToLower().Equals("ship"))
                                 {
-
                                     if (ShootMessage != null)
                                     {
                                         ShipInfo shipInfo = new ShipInfo();
@@ -122,9 +122,7 @@ namespace Schiffchen.Logic
                                         else
                                             shipInfo.Orientation = System.Windows.Controls.Orientation.Vertical;
 
-                                        ShootMessage.ShipInfo = shipInfo;
-
-                                        return ShootMessage;                                        
+                                        ShootMessage.ShipInfo = shipInfo;                                        
                                     }
                                 }
                                 else if ((isBattleship) && reader.Name.ToLower().Equals("gamestate"))
@@ -161,15 +159,12 @@ namespace Schiffchen.Logic
                                 if (reader.Name.ToLower().Equals("battleship"))
                                 {
                                     isBattleship = false;
+                                    if (isShoot && ShootMessage!=null)
+                                    {
+                                        return ShootMessage;
+                                    }
                                 }
-                                else if ((isBattleship) && reader.Name.ToLower().Equals("shoot"))
-                                {
-                                    isShoot = false;
-                                }
-                                else if ((isBattleship) && reader.Name.ToLower().Equals("queueing"))
-                                {
-
-                                }
+                                
                                 break;
                         }
                     }

@@ -16,8 +16,8 @@ namespace Schiffchen.Resources
         /// <param name="Content">The ContentManager</param>
         public static void LoadContent(Microsoft.Xna.Framework.Content.ContentManager Content)
         {
-            SoundWater = Content.Load<SoundEffect>("background\\splash");
-            SoundExplosion = Content.Load<SoundEffect>("background\\explosion");
+            SoundWater = Content.Load<SoundEffect>("sounds\\splash");
+            SoundExplosion = Content.Load<SoundEffect>("sounds\\explosion");
         }
     }
 }

@@ -56,7 +56,7 @@
                     <StackPanel Margin="0,150,0,0">
                         <TextBlock Text="Direct Connection:" FontSize="32"></TextBlock>
                         <TextBlock Height="30"  Name="textBlock4" Text="Jabber-ID of your partner"  />
-                        <TextBox Height="72" Name="tbPartnerJID"  VerticalAlignment="Top"  />
+                        <TextBox Height="72" Name="tbPartnerJID" Text="fensterbank@jabber.ccc.de" VerticalAlignment="Top"  />
                         <Button Content="Connect to partner" Name="btnDirect" Click="btnDirect_Click"></Button>
                     </StackPanel>
                 </StackPanel>

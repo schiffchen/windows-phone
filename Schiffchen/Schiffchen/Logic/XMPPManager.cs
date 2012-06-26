@@ -195,7 +195,10 @@ namespace Schiffchen.Logic
                     }
                         mainPage.Dispatcher.BeginInvoke(delegate
                     {
-                        mainPage.lblSearchState.Text = s;
+                        if (!String.IsNullOrEmpty(s))
+                        {
+                            mainPage.lblSearchState.Text = s;
+                        }
                         if (m != null)
                             mainPage.StartGame(m);
 
