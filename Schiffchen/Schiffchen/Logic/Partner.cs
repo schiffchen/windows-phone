@@ -14,13 +14,19 @@ using Schiffchen.Logic.Enum;
 
 namespace Schiffchen.Logic
 {
+    /// <summary>
+    /// Handles all methods to communicate with the game partner
+    /// </summary>
     public class Partner
     {
 
         public static DateTime LastPing = DateTime.Now;
-
         public static PartnerState OnlineState { get; set; }
 
+        /// <summary>
+        /// Sends the dice information to the partner
+        /// </summary>
+        /// <param name="dice">The spots of the dice</param>
         public static void Dice(int dice)
         {
             try
@@ -36,6 +42,9 @@ namespace Schiffchen.Logic
             }        
         }
 
+        /// <summary>
+        /// Sends a ping to the game partner
+        /// </summary>
         public static void Ping()
         {
             try
@@ -52,6 +61,11 @@ namespace Schiffchen.Logic
            
         }
 
+        /// <summary>
+        /// Sends a shot to the game partner
+        /// </summary>
+        /// <param name="x">The X-Coordinate</param>
+        /// <param name="y">The Y-Coordinate</param>
         public static void Shoot(int x, int y)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
@@ -70,6 +84,10 @@ namespace Schiffchen.Logic
            
         }
 
+        /// <summary>
+        /// Sends the game state when a match is finished
+        /// </summary>
+        /// <param name="looser">The Jabber-ID of the looser</param>
         public static void SendGamestate(String looser)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
@@ -89,6 +107,13 @@ namespace Schiffchen.Logic
 
         }
 
+        /// <summary>
+        /// Transfer the results of an incoming shot to the partner
+        /// </summary>
+        /// <param name="x">The X-Coordinate</param>
+        /// <param name="y">The Y-Coordinate</param>
+        /// <param name="isHit">True, if a ship is hit</param>
+        /// <param name="shipInfo">Is not null, if a ship is destroyed</param>
         public static void TransferShotResult(int x, int y, Boolean isHit, ShipInfo shipInfo)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();

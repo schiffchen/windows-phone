@@ -223,7 +223,14 @@ namespace Schiffchen.Logic
                         case Enum.MatchAction.Shotresult:
                             if (AppCache.CurrentMatch != null)
                             {
-                                this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result));
+                                if (mMessage.ShipInfo != null)
+                                {
+                                    this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result));
+                                }
+                                else
+                                {
+                                    this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result, mMessage.ShipInfo));
+                                }                                
                             }
                             break;
                         case Enum.MatchAction.Ping:

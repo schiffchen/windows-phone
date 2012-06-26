@@ -7,9 +7,13 @@ using Microsoft.Xna.Framework;
 using System.Net.XMPP;
 using Schiffchen.Resources;
 using Schiffchen.Logic;
+using Schiffchen.Logic.Enum;
 
 namespace Schiffchen.GameElemens
 {
+    /// <summary>
+    /// Represents a single ship
+    /// </summary>
     public class Ship
     {
         public ShipType ShipType { get; private set; }
@@ -36,18 +40,17 @@ namespace Schiffchen.GameElemens
         {
             get
             {
-                    return new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(shipTexture.Width * scaleRate), Convert.ToInt32(shipTexture.Height * scaleRate));
+                return new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(shipTexture.Width * scaleRate), Convert.ToInt32(shipTexture.Height * scaleRate));
             }
         }
 
-        public void UpdatePosition()
-        {
-            if (this.StartField != null)
-            {
-                this.Position = StartField.Position;
-            }
-        }
-
+        /// <summary>
+        /// Creates a new instance of a ship
+        /// </summary>
+        /// <param name="owner">The Jabber-ID of the owner</param>
+        /// <param name="type">The type</param>
+        /// <param name="or">The orientation</param>
+        /// <param name="targetField">The target field, where the ship is placed</param>
         public Ship(JID owner, ShipType type, System.Windows.Controls.Orientation or, Field targetField)
         {
             this.Owner = owner;
@@ -68,6 +71,11 @@ namespace Schiffchen.GameElemens
 
         }
 
+        /// <summary>
+        /// Creates a new instance of a ship, which is not placed on the playground
+        /// </summary>
+        /// <param name="owner">The Jabber-ID of the owner</param>
+        /// <param name="type">The type</param>                
         public Ship(JID owner, ShipType type)
         {
             this.Owner = owner;
@@ -78,12 +86,12 @@ namespace Schiffchen.GameElemens
 
             switch (type)
             {
-                case Schiffchen.ShipType.DESTROYER:
-                case Schiffchen.ShipType.SUBMARINE:
+                case ShipType.DESTROYER:
+                case ShipType.SUBMARINE:
                     this.Orientation = System.Windows.Controls.Orientation.Vertical;
                     break;
-                case Schiffchen.ShipType.BATTLESHIP:
-                case Schiffchen.ShipType.AIRCRAFT_CARRIER:
+                case ShipType.BATTLESHIP:
+                case ShipType.AIRCRAFT_CARRIER:
                     this.Orientation = System.Windows.Controls.Orientation.Horizontal;
                     break;
             }
@@ -92,16 +100,16 @@ namespace Schiffchen.GameElemens
             // Ship is not placed. We place it manually
             switch (type)
             {
-                case Schiffchen.ShipType.DESTROYER:
+                case ShipType.DESTROYER:
                     this.Position = new Vector2(20, DeviceCache.BelowGrid + 20);
                     break;
-                case Schiffchen.ShipType.SUBMARINE:
+                case ShipType.SUBMARINE:
                     this.Position = new Vector2(20 + (1 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid + 20);
                     break;
-                case Schiffchen.ShipType.BATTLESHIP:
+                case ShipType.BATTLESHIP:
                     this.Position = new Vector2(20 + (2 * (this.shipTexture.Height * scaleRate)) + 20, DeviceCache.BelowGrid + 20);
                     break;
-                case Schiffchen.ShipType.AIRCRAFT_CARRIER:
+                case ShipType.AIRCRAFT_CARRIER:
                     this.Position = new Vector2(20 + (2 * (this.shipTexture.Height * scaleRate)) + 20, DeviceCache.BelowGrid + (this.shipTexture.Height * scaleRate) + 30);
                     break;
             }
@@ -115,6 +123,22 @@ namespace Schiffchen.GameElemens
             
         }
 
+        /// <summary>
+        /// Updates the position of the ship
+        /// </summary>
+        public void UpdatePosition()
+        {
+            if (this.StartField != null)
+            {
+                this.Position = StartField.Position;
+            }
+        }
+
+        /// <summary>
+        /// Hits the ship on a specific field.
+        /// If the field is found in the Fields-List, the specific HitPoint will be changed.
+        /// </summary>
+        /// <param name="f"></param>
         public void HitOnField(Field f)
         {
             for (int i = 0; i < this.Fields.Count; i++)
@@ -127,6 +151,9 @@ namespace Schiffchen.GameElemens
             CheckState();
         }
 
+        /// <summary>
+        /// Checks if all hitpoints are destroyed and updates the isDestroyed-Property of the ship
+        /// </summary>
         private void CheckState()
         {
             Boolean destroyed = true;
@@ -140,32 +167,35 @@ namespace Schiffchen.GameElemens
             this.IsDestroyed = destroyed;
         }
 
+        /// <summary>
+        /// Loads the texture of this ship by checking the ship type
+        /// </summary>
         private void LoadTexture()
         {
             switch (this.ShipType)
             {
-                case Schiffchen.ShipType.DESTROYER:
+                case ShipType.DESTROYER:
                     this.Size = 2;
                     if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
                         this.shipTexture = TextureManager.ShipDestroyerV;
                     else
                         this.shipTexture = TextureManager.ShipDestroyerH;
                     break;
-                case Schiffchen.ShipType.SUBMARINE:
+                case ShipType.SUBMARINE:
                     this.Size = 3;
                     if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
                         this.shipTexture = TextureManager.ShipSubmarineV;
                     else
                         this.shipTexture = TextureManager.ShipSubmarineH;
                     break;
-                case Schiffchen.ShipType.BATTLESHIP:
+                case ShipType.BATTLESHIP:
                     this.Size = 4;
                     if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
                         this.shipTexture = TextureManager.ShipBattleshipV;
                     else
                         this.shipTexture = TextureManager.ShipBattleshipH;
                     break;
-                case Schiffchen.ShipType.AIRCRAFT_CARRIER:
+                case ShipType.AIRCRAFT_CARRIER:
                     this.Size = 5;
                     if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
                         this.shipTexture = TextureManager.ShipAircraftcarrierV;
@@ -176,11 +206,19 @@ namespace Schiffchen.GameElemens
             this.scaleRate = calculateSizeRatio();
         }
 
+        /// <summary>
+        /// Sets the position of the ship
+        /// </summary>
+        /// <param name="p">The new position</param>
         public void SetPosition(Vector2 p)
         {
             this.Position = p;
         }
 
+        /// <summary>
+        /// Calculates the size ratio of the ship by taking the field with of the own playground
+        /// </summary>
+        /// <returns></returns>
         private float calculateSizeRatio()
         {
             if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
@@ -189,6 +227,9 @@ namespace Schiffchen.GameElemens
                 return (float)AppCache.CurrentMatch.OwnPlayground.FieldSize.Width / this.shipTexture.Height;
         }
 
+        /// <summary>
+        /// Glues the ship to its referenced fields
+        /// </summary>
         public void GlueToFields()
         {
             if (this.Fields != null)
@@ -211,6 +252,9 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Finishes the placement, so that the ship cannot moved again
+        /// </summary>
         public void FinishPlacement()
         {
             if (this.Fields != null)
@@ -229,6 +273,9 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Toggles the orientation of the ship
+        /// </summary>
         public void ToggleOrientation()
         {
             if (this.Orientation == System.Windows.Controls.Orientation.Horizontal)
@@ -244,6 +291,9 @@ namespace Schiffchen.GameElemens
             AppCache.CurrentMatch.OwnPlayground.Refresh();
         }
 
+        /// <summary>
+        /// Starts the movement of this ship by removing all referenced fields
+        /// </summary>
         public void StartMovement()
         {
             this.StartField = null;
@@ -257,6 +307,10 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Draws the ship to the screen
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public void Draw(SpriteBatch spriteBatch)
         {
                 spriteBatch.Draw(shipTexture, new Vector2(Position.X, Position.Y), null, OverlayColor, 0f, Vector2.Zero, calculateSizeRatio(), SpriteEffects.None, 0f);

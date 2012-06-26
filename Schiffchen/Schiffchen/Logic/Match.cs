@@ -105,26 +105,31 @@ namespace Schiffchen.Logic
             pingTimer.Interval = new TimeSpan(0, 0, 10);
             pingTimer.Tick += new EventHandler(pingTimer_Tick);
             pingTimer.Start();
-        }
+        }                           
 
         /// <summary>
-        /// Is called on receiving a message with the gamestate
+        /// Initializes the arrays of own ships and partner ships
         /// </summary>
-        /// <param name="sender">The sender</param>
-        /// <param name="e">The message event arguments</param>
-        void XmppManager_IncomingGamestate(object sender, MessageEventArgs e)
+        private void InitializeShips()
         {
-            if (!this.GamestateSended)
-            {
-                JID looser = getLooser();
-                if (looser != null)
-                {
-                    Partner.SendGamestate(looser.BareJID);
-                    this.GamestateSended = true;
-                }                
-            }
+            this.OwnShips = new Ship[4];
+            this.PartnerShips = new Ship[4];
+            this.OwnShips[0] = new Ship(this.OwnJID, ShipType.DESTROYER);
+            this.OwnShips[1] = new Ship(this.OwnJID, ShipType.SUBMARINE);
+            this.OwnShips[2] = new Ship(this.OwnJID, ShipType.BATTLESHIP);
+            this.OwnShips[3] = new Ship(this.OwnJID, ShipType.AIRCRAFT_CARRIER);
+
+            /*
+            this.PartnerShips[0] = new Ship(this.PartnerJID, ShipType.DESTROYER, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
+            this.PartnerShips[1] = new Ship(this.PartnerJID, ShipType.SUBMARINE, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
+            this.PartnerShips[2] = new Ship(this.PartnerJID, ShipType.BATTLESHIP, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
+            this.PartnerShips[3] = new Ship(this.PartnerJID, ShipType.AIRCRAFT_CARRIER, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
+             * 
+             * */
         }
 
+
+        #region PrivateLogic
         /// <summary>
         /// Iterates through all own and enemy ships and determines, if someone has won the game.        
         /// </summary>
@@ -156,7 +161,254 @@ namespace Schiffchen.Logic
                 return null;
             }
         }
-      
+
+        /// <summary>
+        /// Checks, if all ships are placed
+        /// </summary>
+        /// <returns>A boolean value</returns>
+        private Boolean areAllShipsPlaced()
+        {
+            foreach (Ship s in this.OwnShips)
+            {
+                if (!s.IsPlaced)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Only for debugging
+        /// Rolls the dice of the enemy with low value
+        /// </summary>
+        private void FakeIncomingDiceroll()
+        {
+            FooterMenu.Dices[1].Roll(1);
+        }
+
+        /// <summary>
+        /// Checks, whon won the dice roll phase
+        /// </summary>
+        private void CheckDiceWinner()
+        {
+            if (PartnerDice != -1 && OwnDice != -1)
+            {
+                if (PartnerDice > OwnDice)
+                {
+                    // Partner has won!
+                    FooterMenu.Dices[1].Blink(TextureManager.Green);
+                    FooterMenu.Dices[1].BlinkComplete += new EventHandler<EventArgs>(Match_BlinkComplete);
+                    DiceWinnerChecked = true;
+                    this.IsMyTurn = false;
+                }
+                else if (PartnerDice < OwnDice)
+                {
+                    // We have won!
+                    FooterMenu.Dices[0].Blink(TextureManager.Green);
+                    FooterMenu.Dices[0].BlinkComplete += new EventHandler<EventArgs>(Match_BlinkComplete);
+                    DiceWinnerChecked = true;
+                    this.IsMyTurn = true;
+                    this.switchToTargetMode();
+                }
+                else
+                {
+                    // Please roll again!
+                    FooterMenu.Dices[0].Blink(TextureManager.Yellow);
+                    FooterMenu.Dices[1].Blink(TextureManager.Yellow);
+                    DispatcherTimer resetDices = new DispatcherTimer();
+                    resetDices.Interval = new TimeSpan(0, 0, 2);
+                    resetDices.Tick += new EventHandler(resetDices_Tick);
+                    resetDices.Start();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reduces the own ship playground to minimap and increases the shooting playground for targeting
+        /// </summary>
+        private void switchToTargetMode()
+        {
+            if (this.MatchState == Enum.MatchState.Playing && this.ShootingPlayground.PlaygroundMode == PlaygroundMode.Minimap)
+            {
+                this.ShootingPlayground.IncreaseToMain();
+                this.OwnPlayground.ReduceToMinimap();
+            }
+        }
+
+        /// <summary>
+        /// Reduces the shooting playground to minimap and increases the own ship playground for viewing the ships and shots of the enemy
+        /// </summary>
+        private void switchToShipviewerMode()
+        {
+            if (this.MatchState == Enum.MatchState.Playing && this.OwnPlayground.PlaygroundMode == PlaygroundMode.Minimap)
+            {
+                this.OwnPlayground.IncreaseToMain();
+                this.ShootingPlayground.ReduceToMinimap();
+            }
+        }
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// Is called, when a dice roll of the enemy is received
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The dice event arguments</param>
+        void XmppManager_IncomingDiceroll(object sender, RollingDiceEventArgs e)
+        {
+            // Roll the dice of the enemy with the received value
+            if (FooterMenu.Dices[1] != null)
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(delegate
+                {
+                    FooterMenu.Dices[1].Roll(e.Value);
+                }
+                );
+            }
+            else
+            {
+                // Store the Value for use it later
+                this.PartnersPreDice = e.Value;
+            }
+        }
+
+
+
+        /// <summary>
+        /// Is called, when the Blink-Animation of a dice is completed.
+        /// Removes the dices from the FooterMenu and switch the gamestate to MatchState.Playing
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The event arguments</param>
+        void Match_BlinkComplete(object sender, EventArgs e)
+        {
+            this.FooterMenu.Dices[0] = null;
+            this.FooterMenu.Dices[1] = null;
+            this.MatchState = Enum.MatchState.Playing;
+        }
+
+        /// <summary>
+        /// Resets the dices to the initial value ? and stops the timer
+        /// </summary>
+        /// <param name="sender">The timer</param>
+        /// <param name="e">The event arguments</param>
+        void resetDices_Tick(object sender, EventArgs e)
+        {
+            FooterMenu.Dices[0].ResetValue();
+            FooterMenu.Dices[1].ResetValue();
+            DispatcherTimer timer = (DispatcherTimer)sender;
+            timer.Stop();
+        }
+
+        /// <summary>
+        /// Is called, when a turn button is clicked.
+        /// Toggles the orientation of the selected ship in placement mode.
+        /// </summary>
+        /// <param name="sender">The clicked button</param>
+        /// <param name="e">The event arguments</param>
+        void btnTurn_Click(object sender, EventArgs e)
+        {
+            if (AppCache.ActivePlacementShip != null)
+            {
+                AppCache.ActivePlacementShip.ToggleOrientation();
+            }
+        }
+
+        /// <summary>
+        /// Is called, when a accept button is clicked.
+        /// Finishes the placement of the selected ship in placement mode.
+        /// If all ships are placed, the MatchState is changed to MatchState.Dicing
+        /// </summary>
+        /// <param name="sender">The clicked button</param>
+        /// <param name="e">The event arguments</param>
+        void btnAccept_Click(object sender, EventArgs e)
+        {
+            if (AppCache.ActivePlacementShip != null)
+            {
+                AppCache.ActivePlacementShip.FinishPlacement();
+            }
+            if (areAllShipsPlaced())
+            {
+                this.MatchState = Enum.MatchState.Dicing;
+                FooterMenu.RemoveAllButtons();
+                Dice ownDice = new GameElemens.Dice(new Vector2(20, 10), "Your Dice");
+                ownDice.Click += new EventHandler<EventArgs>(ownDice_Click);
+                FooterMenu.Dices[0] = ownDice;
+
+                Dice partnersDice = new GameElemens.Dice(new Vector2(140, 10), "Partners Dice");
+                partnersDice.ReadOnly = true;
+                partnersDice.RollingFinish += new EventHandler<RollingDiceEventArgs>(partnersDice_RollingFinish);
+                FooterMenu.Dices[1] = partnersDice;
+
+                if (this.PartnersPreDice != -1)
+                {
+                    // Partner has alread rolled the dices
+                    Deployment.Current.Dispatcher.BeginInvoke(delegate
+                    {
+                        FooterMenu.Dices[1].Roll(this.PartnersPreDice);
+                    }
+                );
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Is called on receiving a message with the gamestate
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The message event arguments</param>
+        void XmppManager_IncomingGamestate(object sender, MessageEventArgs e)
+        {
+            if (!this.GamestateSended)
+            {
+                JID looser = getLooser();
+                if (looser != null)
+                {
+                    Partner.SendGamestate(looser.BareJID);
+                    this.GamestateSended = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Is called, when the dice of the enemy finished rolling
+        /// </summary>
+        /// <param name="sender">The rolled dice</param>
+        /// <param name="e">The dice event arguments</param>
+        void partnersDice_RollingFinish(object sender, RollingDiceEventArgs e)
+        {
+            this.PartnerDice = e.Value;
+            CheckDiceWinner();
+        }
+
+        /// <summary>
+        /// Is called, when the own dice is clicked.
+        /// Starts the dicing
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void ownDice_Click(object sender, EventArgs e)
+        {
+            Dice dice = (Dice)sender;
+            dice.RollingFinish += new EventHandler<RollingDiceEventArgs>(dice_RollingFinish);
+            dice.Roll();
+            //this.FakeIncomingDiceroll();
+
+        }
+
+        /// <summary>
+        /// Is called, when the onw dice finished rolling
+        /// Sends the result to the partner and checks, if a winner is already available
+        /// </summary>
+        /// <param name="sender">The rolled dice</param>
+        /// <param name="e">The dice event arguments</param>
+        void dice_RollingFinish(object sender, RollingDiceEventArgs e)
+        {
+            this.OwnDice = e.Value;
+            Partner.Dice(e.Value);
+            CheckDiceWinner();
+        }
+
         /// <summary>
         /// Is called on receiving a message with a ping of the partner
         /// Sets the LastPing-Object to Now.
@@ -176,7 +428,7 @@ namespace Schiffchen.Logic
         /// <param name="sender">The sender</param>
         /// <param name="e">The event arguments</param>
         void pingTimer_Tick(object sender, EventArgs e)
-        {            
+        {
             if (DateTime.Now - Partner.LastPing > new TimeSpan(0, 0, 40))
             {
                 Partner.OnlineState = PartnerState.Offline;
@@ -199,17 +451,20 @@ namespace Schiffchen.Logic
         /// <param name="e">The shoot event arguments</param>
         void XmppManager_IncomingShot(object sender, ShootEventArgs e)
         {
+            // Only do something, if it is not my turn at the moment!
             if (!this.IsMyTurn)
             {
 
                 if (AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip == null)
                 {
+                    // Water
                     AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
                     SoundManager.SoundWater.Play();
                     Partner.TransferShotResult(e.X, e.Y, false, null);
                 }
                 else
                 {
+                    // Hitted a ship
                     AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
                     Ship sh = AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip;
                     sh.HitOnField(AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1]);
@@ -236,12 +491,18 @@ namespace Schiffchen.Logic
                 {
                     Partner.SendGamestate(looser.BareJID);
                     this.GamestateSended = true;
-                }        
+                }
             }
         }
 
+        /// <summary>
+        /// Is called on receiving a result message of an own shot
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The shoot event arguments</param>
         void XmppManager_IncomingShotResult(object sender, ShootEventArgs e)
         {
+            // Check, if the sended shot and the received shot message are talking from the same field
             if (e.X == SendedShot.X && e.Y == SendedShot.Y)
             {
                 if (e.Result.ToLower().Equals("water"))
@@ -253,7 +514,12 @@ namespace Schiffchen.Logic
                 {
                     SoundManager.SoundExplosion.Play();
                     AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
-                }               
+                    // Here we still need logic, if a ship of the partner is destroyed!
+                    if (e.ShipInfo != null)
+                    {
+
+                    }
+                }
             }
             else
             {
@@ -270,10 +536,14 @@ namespace Schiffchen.Logic
             {
                 Partner.SendGamestate(looser.BareJID);
                 this.GamestateSended = true;
-            }    
+            }
         }
 
-
+        /// <summary>
+        /// Is called, when a field on the ShootingPlayground is selected as target
+        /// </summary>
+        /// <param name="sender">The Playground</param>
+        /// <param name="e">The shoot event arguments</param>
         void ShootingPlayground_TargetSelected(object sender, ShootEventArgs e)
         {
             if (SendedShot == null)
@@ -290,8 +560,14 @@ namespace Schiffchen.Logic
             }
         }
 
+        /// <summary>
+        /// Is called, when an attack button is clicked
+        /// </summary>
+        /// <param name="sender">The clicked button</param>
+        /// <param name="e">The event arguments</param>
         void attack_Click(object sender, EventArgs e)
         {
+            // If this.SendetShot != null, the confirmation of a sended shot has not already be received.
             if (this.SendedShot == null)
             {
                 IconButton btnAttack = (IconButton)sender;
@@ -301,199 +577,35 @@ namespace Schiffchen.Logic
             }
         }
 
+        /// <summary>
+        /// Is called, when the minimap of the own playground is clicked
+        /// </summary>
+        /// <param name="sender">The own playground</param>
+        /// <param name="e">The event arguments</param>
         void OwnPlayground_Click(object sender, EventArgs e)
         {
             switchToShipviewerMode();
         }
 
+        /// <summary>
+        /// Is called, when the minimap of the shooting playground is clicked
+        /// </summary>
+        /// <param name="sender">The shooting playground</param>
+        /// <param name="e">The event arguments</param>
         void shootingPlayground_Click(object sender, EventArgs e)
         {
             switchToTargetMode();
         }
 
-        private void switchToTargetMode()
-        {
-            if (this.MatchState == Enum.MatchState.Playing && this.ShootingPlayground.PlaygroundMode == PlaygroundMode.Minimap)
-            {
-                this.ShootingPlayground.IncreaseToMain();
-                this.OwnPlayground.ReduceToMinimap();
-            }
-        }
+        #endregion
 
-        private void switchToShipviewerMode()
-        {
-            if (this.MatchState == Enum.MatchState.Playing && this.OwnPlayground.PlaygroundMode == PlaygroundMode.Minimap)
-            {
-                this.OwnPlayground.IncreaseToMain();
-                this.ShootingPlayground.ReduceToMinimap();
-            }
-        }
-
-        void XmppManager_IncomingDiceroll(object sender, RollingDiceEventArgs e)
-        {
-            if (FooterMenu.Dices[1] != null)
-            {
-                Deployment.Current.Dispatcher.BeginInvoke(delegate
-                        {
-                            FooterMenu.Dices[1].Roll(e.Value);
-                        }
-                );
-            }
-            else
-            {
-                this.PartnersPreDice = e.Value;               
-            }
-        }
-
-        private void FakeIncomingDiceroll()
-        {
-            FooterMenu.Dices[1].Roll(1);
-        }
-
-        void CheckDiceWinner()
-        {
-            if (PartnerDice != -1 && OwnDice != -1)
-            {
-                if (PartnerDice > OwnDice)
-                {
-                    FooterMenu.Dices[1].Blink(TextureManager.Green);
-                    FooterMenu.Dices[1].BlinkComplete +=new EventHandler<EventArgs>(Match_BlinkComplete);
-                    DiceWinnerChecked = true;
-                    this.IsMyTurn = false;
-                }
-                else if (PartnerDice < OwnDice)
-                {
-                    FooterMenu.Dices[0].Blink(TextureManager.Green);
-                    FooterMenu.Dices[0].BlinkComplete += new EventHandler<EventArgs>(Match_BlinkComplete);
-                    DiceWinnerChecked = true;
-                    this.IsMyTurn = true;
-                    this.switchToTargetMode();
-                }
-                else
-                {
-                    FooterMenu.Dices[0].Blink(TextureManager.Yellow);
-                    FooterMenu.Dices[1].Blink(TextureManager.Yellow);
-                    DispatcherTimer resetDices = new DispatcherTimer();
-                    resetDices.Interval = new TimeSpan(0, 0, 2);
-                    resetDices.Tick += new EventHandler(resetDices_Tick);
-                    resetDices.Start();
-                }
-            }
-        }
-
-        void Match_BlinkComplete(object sender, EventArgs e)
-        {
-            this.FooterMenu.Dices[0] = null;
-            this.FooterMenu.Dices[1] = null;
-            this.MatchState = Enum.MatchState.Playing;
-        }
-
-        void resetDices_Tick(object sender, EventArgs e)
-        {
-            FooterMenu.Dices[0].ResetValue();
-            FooterMenu.Dices[1].ResetValue();
-            DispatcherTimer timer = (DispatcherTimer)sender;
-            timer.Stop();
-        }
-
-        void btnTurn_Click(object sender, EventArgs e)
-        {
-            if (AppCache.ActivePlacementShip != null)
-            {
-                AppCache.ActivePlacementShip.ToggleOrientation();
-            }
-        }
-
-        void btnAccept_Click(object sender, EventArgs e)
-        {
-            if (AppCache.ActivePlacementShip != null)
-            {
-                AppCache.ActivePlacementShip.FinishPlacement();
-            }
-            if (areAllShipsPlaced())
-            {
-                this.MatchState = Enum.MatchState.Dicing;
-                FooterMenu.RemoveAllButtons();
-                Dice ownDice = new GameElemens.Dice(new Vector2(20, 10), "Your Dice");
-                ownDice.Click += new EventHandler<EventArgs>(ownDice_Click);
-                FooterMenu.Dices[0] = ownDice;
-
-                Dice partnersDice = new GameElemens.Dice(new Vector2(140, 10), "Partners Dice");
-                partnersDice.ReadOnly = true;
-                partnersDice.RollingFinish += new EventHandler<RollingDiceEventArgs>(partnersDice_RollingFinish);
-                FooterMenu.Dices[1] = partnersDice;
-
-                if (this.PartnersPreDice != -1)
-                {
-                    // Partner has alread rolled the dices
-                    Deployment.Current.Dispatcher.BeginInvoke(delegate
-                        {
-                            FooterMenu.Dices[1].Roll(this.PartnersPreDice);
-                        }
-                );
-                }
-
-            }
-        }
-
-        void partnersDice_RollingFinish(object sender, RollingDiceEventArgs e)
-        {
-            this.PartnerDice = e.Value;
-            CheckDiceWinner();
-        }
-
-
-        void ownDice_Click(object sender, EventArgs e)
-        {
-            Dice dice = (Dice)sender;
-            dice.RollingFinish += new EventHandler<RollingDiceEventArgs>(dice_RollingFinish);
-            dice.Roll();
-            //this.FakeIncomingDiceroll();
-            
-        }
-
-        void dice_RollingFinish(object sender, RollingDiceEventArgs e)
-        {
-            this.OwnDice = e.Value;
-            Partner.Dice(e.Value);           
-            CheckDiceWinner();
-        }
-
-    
-
-
-        
-
-        private Boolean areAllShipsPlaced()
-        {
-            foreach (Ship s in this.OwnShips)
-            {
-                if (!s.IsPlaced)
-                    return false;
-            }
-            return true;
-        }
-
-        private void InitializeShips()
-        {
-            this.OwnShips = new Ship[4];
-            this.PartnerShips = new Ship[4];
-            this.OwnShips[0] = new Ship(this.OwnJID, ShipType.DESTROYER);
-            this.OwnShips[1] = new Ship(this.OwnJID, ShipType.SUBMARINE);
-            this.OwnShips[2] = new Ship(this.OwnJID, ShipType.BATTLESHIP);
-            this.OwnShips[3] = new Ship(this.OwnJID, ShipType.AIRCRAFT_CARRIER);
-
-            /*
-            this.PartnerShips[0] = new Ship(this.PartnerJID, ShipType.DESTROYER, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
-            this.PartnerShips[1] = new Ship(this.PartnerJID, ShipType.SUBMARINE, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
-            this.PartnerShips[2] = new Ship(this.PartnerJID, ShipType.BATTLESHIP, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
-            this.PartnerShips[3] = new Ship(this.PartnerJID, ShipType.AIRCRAFT_CARRIER, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
-             * 
-             * */
-        }
-
+        #region MainXNALogic
+        /// <summary>
+        /// Handles all update logic of a match
+        /// Updates all other referenced objects like playgrounds and ships
+        /// </summary>
         public void Update()
-        {           
+        {
             if (this.MatchState == Enum.MatchState.ShipPlacement)
             {
                 if (AppCache.ActivePlacementShip != null)
@@ -519,7 +631,11 @@ namespace Schiffchen.Logic
             }
         }
 
-
+        /// <summary>
+        /// Handles all drawing logic of a match.
+        /// Draws all other referenced objects like playgrounds, ships and menus.
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public void Draw(SpriteBatch spriteBatch)
         {
             this.OwnPlayground.Draw(spriteBatch);
@@ -530,5 +646,6 @@ namespace Schiffchen.Logic
                 s.Draw(spriteBatch);
             }
         }
+        #endregion
     }
 }

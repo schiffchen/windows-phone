@@ -73,16 +73,16 @@
     </Compile>
     <Compile Include="Controls\FooterMenu.cs" />
     <Compile Include="Controls\IconButton.cs" />
-    <Compile Include="Controls\WatermarkedTextbox.cs" />
     <Compile Include="Event\MessageEventArgs.cs" />
     <Compile Include="Event\RollingDiceEventArgs.cs" />
     <Compile Include="Event\ShootEventArgs.cs" />
     <Compile Include="GameElemens\Dice.cs" />
+    <Compile Include="GameElemens\Shot.cs" />
     <Compile Include="Logic\CollissionManager.cs" />
     <Compile Include="Logic\DeviceCache.cs" />
     <Compile Include="GameElemens\Field.cs" />
     <Compile Include="GameElemens\Ship.cs" />
-    <Compile Include="GameElemens\ShipType.cs" />
+    <Compile Include="Logic\Enum\ShipType.cs" />
     <Compile Include="GameElemens\TiledBackground.cs" />
     <Compile Include="GamePage.xaml.cs">
       <DependentUpon>GamePage.xaml</DependentUpon>
@@ -96,13 +96,14 @@
     <Compile Include="Logic\Enum\MatchState.cs" />
     <Compile Include="Logic\Enum\MatchAction.cs" />
     <Compile Include="Logic\Enum\QueueingAction.cs" />
+    <Compile Include="Logic\Messages\ShipInfo.cs" />
     <Compile Include="Logic\Partner.cs" />
     <Compile Include="Logic\Match.cs" />
     <Compile Include="Logic\Matchmaker.cs" />
     <Compile Include="Logic\Messages\BattleshipMessage.cs" />
     <Compile Include="Logic\Messages\MatchMessage.cs" />
     <Compile Include="Logic\Messages\QueuingMessage.cs" />
-    <Compile Include="Logic\Messages\Type.cs" />
+    <Compile Include="Logic\Enum\Type.cs" />
     <Compile Include="Logic\TouchManager.cs" />
     <Compile Include="Logic\VibrationManager.cs" />
     <Compile Include="Logic\XMLManager.cs" />

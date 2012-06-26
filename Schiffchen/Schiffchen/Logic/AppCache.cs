@@ -16,17 +16,39 @@ using Schiffchen.Resources;
 
 namespace Schiffchen.Logic
 {
+    /// <summary>
+    /// Defines the cache of the game, where many global variables are stored
+    /// </summary>
     public class AppCache
     {
+        /// <summary>
+        /// It's the XMPP-Manager for handling the connection
+        /// </summary>
         public static XMPPManager XmppManager;
+
+        /// <summary>
+        /// Represents a current match
+        /// </summary>
         public static Match CurrentMatch;
+
         public static System.Windows.Media.SolidColorBrush cRed;
         public static  System.Windows.Media.SolidColorBrush cGreen;
         public static System.Windows.Media.SolidColorBrush cYellow;
+
+        /// <summary>
+        /// Represents the touched ship
+        /// </summary> 
         public static Ship TouchedShip;
+
+        /// <summary>
+        /// Represents the selected ship
+        /// </summary>
         public static Ship ActivePlacementShip;
 
 
+        /// <summary>
+        /// Is called, when a static instance of AppCache is created
+        /// </summary>
         static AppCache()
         {
             cRed = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 190, 0, 0));
@@ -35,6 +57,10 @@ namespace Schiffchen.Logic
 
         }
 
+        /// <summary>
+        /// Draws all cached static things to the screen
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public static void Draw(SpriteBatch spriteBatch)
         {
             #region GameInfo
@@ -79,6 +105,9 @@ namespace Schiffchen.Logic
             #endregion
         }
 
+        /// <summary>
+        /// Updates all cached static things
+        /// </summary>
         public static void Update()
         {
             if (AppCache.CurrentMatch != null)

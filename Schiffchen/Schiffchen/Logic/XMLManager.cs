@@ -8,8 +8,16 @@ using Schiffchen.Logic.Messages;
 
 namespace Schiffchen.Logic
 {
+    /// <summary>
+    /// Handles the logic of parsing XML messages
+    /// </summary>
     public class XMLManager
     {
+        /// <summary>
+        /// Parse an XML string and returns a specific BattleshipMessage, if it was valid.
+        /// </summary>
+        /// <param name="strXML">The XML string</param>
+        /// <returns>The specific BattleshipMessage. Returns null, if it was not a valid BattleshipMessage.</returns>
         public static BattleshipMessage GetBattleshipMessage(String strXML)
         {           
             try
@@ -29,7 +37,7 @@ namespace Schiffchen.Logic
                                 {
                                     isBattleship = true;
                                 }
-                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("queueing"))
+                                else if ((isBattleship) && reader.Name.ToLower().Equals("queueing"))
                                 {
                                     String result = reader.GetAttribute("action");
 
@@ -68,7 +76,7 @@ namespace Schiffchen.Logic
                                     }                                 
                                     return message;
                                 }
-                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("diceroll"))
+                                else if ((isBattleship) && reader.Name.ToLower().Equals("diceroll"))
                                 {
                                     int dice = Convert.ToInt32(reader.GetAttribute("dice"));
                                     Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
@@ -76,7 +84,7 @@ namespace Schiffchen.Logic
                                     MatchMessage message = new MatchMessage(Enum.MatchAction.Diceroll, dictionary);
                                     return message;
                                 }
-                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("shoot"))
+                                else if ((isBattleship) && reader.Name.ToLower().Equals("shoot"))
                                 {
                                     isShoot = true;
                                     
@@ -97,7 +105,7 @@ namespace Schiffchen.Logic
                                     MatchMessage message = new MatchMessage(action, dictionary);
                                     ShootMessage = message;
                                 }
-                                else if ((isShoot = true) && reader.Name.ToLower().Equals("ship"))
+                                else if ((isShoot) && reader.Name.ToLower().Equals("ship"))
                                 {
 
                                     if (ShootMessage != null)
@@ -119,7 +127,7 @@ namespace Schiffchen.Logic
                                         return ShootMessage;                                        
                                     }
                                 }
-                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("gamestate"))
+                                else if ((isBattleship) && reader.Name.ToLower().Equals("gamestate"))
                                 {
                                     Dictionary<String, Object> dictionary = new Dictionary<String, Object>();
                                     
@@ -154,11 +162,11 @@ namespace Schiffchen.Logic
                                 {
                                     isBattleship = false;
                                 }
-                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("shoot"))
+                                else if ((isBattleship) && reader.Name.ToLower().Equals("shoot"))
                                 {
                                     isShoot = false;
                                 }
-                                else if ((isBattleship = true) && reader.Name.ToLower().Equals("queueing"))
+                                else if ((isBattleship) && reader.Name.ToLower().Equals("queueing"))
                                 {
 
                                 }
@@ -167,9 +175,8 @@ namespace Schiffchen.Logic
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return null;
             }
             return null;
         }

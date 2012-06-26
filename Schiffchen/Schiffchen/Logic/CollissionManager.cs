@@ -12,8 +12,19 @@ using Schiffchen.Logic;
 
 namespace Schiffchen.Logic
 {
+    /// <summary>
+    /// Handles all collission checks for placing ships on the playground
+    /// </summary>
     public class CollissionManager
     {
+
+        /// <summary>
+        /// Checks if the ship can be placed on its current position.
+        /// If the placing is allowed for the fields, they will marked green.
+        /// If the placing is forbidden for the fields, they will marked red.
+        /// </summary>
+        /// <param name="p">The playground with the fields</param>
+        /// <param name="currentShip">The current ship</param>
         public static void HandleFieldCheck(Playground p, Ship currentShip)
         {
             int counter = 0;
@@ -50,6 +61,12 @@ namespace Schiffchen.Logic
             }
         }
 
+        /// <summary>
+        /// Returns all fields, which are good for placing the ship
+        /// </summary>
+        /// <param name="p">The playground with the fields</param>
+        /// <param name="currentShip">The current ship</param>
+        /// <returns></returns>
         public static List<Field> GetFields(Playground p, Ship currentShip)
         {
             List<Field> markedFields = new List<Field>();

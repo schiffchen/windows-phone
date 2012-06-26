@@ -9,14 +9,23 @@ using Schiffchen.GameElemens;
 
 namespace Schiffchen.Logic
 {
+    /// <summary>
+    /// Handles all touch methods of the game
+    /// </summary>
     static class TouchManager
     {
-
+        /// <summary>
+        /// Sets the allowed touch gestures
+        /// </summary>
         public static void SetGame()
         {
             TouchPanel.EnabledGestures = GestureType.FreeDrag | GestureType.DragComplete | GestureType.Tap;
         }
 
+        /// <summary>
+        /// Gets the current touch points
+        /// </summary>
+        /// <returns>A touch point coordinate</returns>
         public static Vector2? GetTouchpoints()
         {
             if (TouchPanel.IsGestureAvailable)
@@ -30,6 +39,10 @@ namespace Schiffchen.Logic
             return null;
         }
 
+        /// <summary>
+        /// Handles the selection of a ship, when it's touched for moving
+        /// </summary>
+        /// <param name="gs">The GestureSample</param>
         private static void HandleShipSelection(GestureSample gs)
         {
             if (AppCache.CurrentMatch != null)
@@ -56,9 +69,12 @@ namespace Schiffchen.Logic
                     }
                 }
             }
-    
 
 
+        /// <summary>
+        /// Starts the placement and movement of a ship, when it's touched for moving
+        /// </summary>
+        /// <param name="gs">The GestureSample</param>
         private static void HandleShipTouchment(GestureSample gs)
         {
             if (AppCache.CurrentMatch != null)
@@ -101,6 +117,10 @@ namespace Schiffchen.Logic
             }
         }
 
+        /// <summary>
+        /// Checks all touchpoints at each call
+        /// </summary>
+        /// <param name="gameTime">The GameTimerEventArgs</param>
         public static void checkTouchpoints(GameTimerEventArgs gameTime)
         {
             while (TouchPanel.IsGestureAvailable)

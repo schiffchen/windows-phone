@@ -5,6 +5,9 @@ using Microsoft.Devices;
 
 namespace Schiffchen.Logic
 {
+    /// <summary>
+    /// Handles the methods for vibration
+    /// </summary>
     public class VibrationManager
     {
 

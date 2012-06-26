@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Input.Touch;
 
 namespace Schiffchen.GameElemens
 {
+    /// <summary>
+    /// Represents a single field of the playground
+    /// </summary>
     public class Field
     {
         public Vector2 Position { get; private set; }
@@ -21,6 +24,13 @@ namespace Schiffchen.GameElemens
 
         public Rectangle Rectangle { get; private set; }
 
+        /// <summary>
+        /// Creates a new instance of a field
+        /// </summary>
+        /// <param name="p">The target position</param>
+        /// <param name="s">The size</param>
+        /// <param name="x">The X-Coordinate</param>
+        /// <param name="y">The Y-Coordinate</param>
         public Field(Vector2 p, Size s, int x, int y)
         {
             this.Position = p;
@@ -31,18 +41,22 @@ namespace Schiffchen.GameElemens
             this.Y = y;
         }
 
+        /// <summary>
+        /// Sets the Position and Size of the field
+        /// </summary>
+        /// <param name="pos">The new position</param>
+        /// <param name="size">The new size</param>
         public void SetProperties(Vector2 pos, Size size)
         {
             this.Position = pos;
             this.Size = size;
             this.Rectangle = new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(Size.Width), Convert.ToInt32(Size.Height));
-        }
+        }        
 
-        public Field()
-        {
-            this.backgroundColor = null;
-        }
-
+        /// <summary>
+        /// Sets the background color of a field
+        /// </summary>
+        /// <param name="color">The given FieldColor</param>
         public void SetColor(FieldColor color)
         {
             switch (color)
@@ -62,12 +76,34 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Resets the background color to transparent
+        /// </summary>
         public void ResetColor()
         {
             this.backgroundColor = null;
         }
 
+        /// <summary>
+        /// Checks if the field is clicked
+        /// </summary>
+        /// <param name="gs">The given GestureSample</param>
+        /// <returns>True if clicked, false if not.</returns>
+        public Boolean IsClicked(GestureSample gs)
+        {
+            int x = Convert.ToInt32(gs.Position.X);
+            int y = Convert.ToInt32(gs.Position.Y);
+            if (this.Rectangle.Contains(x, y))
+            {
+                return true;
+            }
+            return false;
+        }
 
+        /// <summary>
+        /// Draws the field to the screen
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public void Draw(SpriteBatch spriteBatch)
         {
             if (this.backgroundColor != null)
@@ -79,17 +115,6 @@ namespace Schiffchen.GameElemens
             spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X + Size.Width), Convert.ToInt32(Position.Y), 2, Convert.ToInt32(Size.Height)), Color.White); // Right
             spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(Size.Width), 2), Color.White); // Top
             spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y + Size.Height), Convert.ToInt32(Size.Width), 2), Color.White); // Bottom
-        }
-
-        public Boolean IsClicked(GestureSample gs)
-        {
-            int x = Convert.ToInt32(gs.Position.X);
-            int y = Convert.ToInt32(gs.Position.Y);
-            if (this.Rectangle.Contains(x, y))
-            {
-                return true;
-            }
-            return false;
         }
     }
 }

@@ -16,37 +16,29 @@ using System.Net.XMPP;
 
 namespace Schiffchen
 {
+    /// <summary>
+    /// The main page of the app.
+    /// Handles login, contacting matchmaker and starting of games
+    /// </summary>
     public partial class MainPage : PhoneApplicationPage
     {
+        /// <summary>
+        /// Creates the main page and initialize all components
+        /// </summary>
         public MainPage()
         {
             InitializeComponent();
             CheckDisplayedComponents();
         }
-
-        private void btnConnect_Click(object sender, RoutedEventArgs e)
-        {
-            if (AppCache.XmppManager == null)
-            {
-                HandleConnect();
-            }
-            else
-            {
-                if (AppCache.XmppManager.Client.XMPPState == XMPPState.Ready)
-                {
-                    AppCache.XmppManager.Client.Disconnect();
-                }
-                else if (AppCache.XmppManager.Client.XMPPState == XMPPState.Unknown || AppCache.XmppManager.Client.XMPPState == XMPPState.AuthenticationFailed)
-                {
-                    HandleConnect();
-                }
-            }
-        }
-
+        
+        /// <summary>
+        /// Connects to the Jabber server
+        /// </summary>
         private void HandleConnect()
         {
             if (cbAnonymous.IsChecked == true)
             {
+                // This is for debugging. Allows to start a match without beeing logged in
                 //MessageBox.Show("Not implemented!");
                 AppCache.XmppManager = new XMPPManager(tbJID.Text, tbPwd.Password, this);
                 Match m = new Match("123", new JID(tbJID.Text), new JID("gegnerfdgdfg@jabber.ccc.de"));
@@ -66,18 +58,88 @@ namespace Schiffchen
             }
         }
 
+        /// <summary>
+        /// References AppCache.CurrentMatch to the given match and navigates to the XNA part of the game
+        /// </summary>
+        /// <param name="newMatch">The new match</param>
+        public void StartGame(Match newMatch)
+        {
+            AppCache.CurrentMatch = newMatch;
+            NavigationService.Navigate(new Uri("/GamePage.xaml", UriKind.Relative));
+        }
+
+        /// <summary>
+        /// Checks which components and controls are enabled and which are disabled
+        /// </summary>
+        public void CheckDisplayedComponents()
+        {
+            if (AppCache.XmppManager == null || AppCache.XmppManager.Client == null || AppCache.XmppManager.Client.XMPPState != XMPPState.Ready)
+            {
+                btnDirect.IsEnabled = false;
+                btnSearch.IsEnabled = false;
+                tbPartnerJID.IsEnabled = false;
+            }
+            else
+            {
+                btnDirect.IsEnabled = true;
+                btnSearch.IsEnabled = true;
+                tbPartnerJID.IsEnabled = true;
+            }
+        }
+
+        #region Events
+
+        /// <summary>
+        /// Is called when the connect button is clicked
+        /// </summary>
+        /// <param name="sender">The clicked button</param>
+        /// <param name="e">The event arguments</param>
+        private void btnConnect_Click(object sender, RoutedEventArgs e)
+        {
+            if (AppCache.XmppManager == null)
+            {
+                HandleConnect();
+            }
+            else
+            {
+                if (AppCache.XmppManager.Client.XMPPState == XMPPState.Ready)
+                {
+                    AppCache.XmppManager.Client.Disconnect();
+                }
+                else if (AppCache.XmppManager.Client.XMPPState == XMPPState.Unknown || AppCache.XmppManager.Client.XMPPState == XMPPState.AuthenticationFailed)
+                {
+                    HandleConnect();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Is called when the checkbox for anonymous login is checked
+        /// </summary>
+        /// <param name="sender">The checkbox</param>
+        /// <param name="e">The event arguments</param>
         private void cbAnonymous_Checked(object sender, RoutedEventArgs e)
         {
             tbPwd.IsEnabled = false;
             tbJID.IsEnabled = false;
         }
 
+        /// <summary>
+        /// Is called when the checkbox for anonymous login is unchecked
+        /// </summary>
+        /// <param name="sender">The checkbox</param>
+        /// <param name="e">The event arguments</param>
         private void cbAnonymous_Unchecked(object sender, RoutedEventArgs e)
         {
             tbPwd.IsEnabled = true;
             tbJID.IsEnabled = true;
         }
 
+        /// <summary>
+        /// Is called when the button for direct connection is clicked
+        /// </summary>
+        /// <param name="sender">The clicked button</param>
+        /// <param name="e">The event arguments</param>
         private void btnDirect_Click(object sender, RoutedEventArgs e)
         {
             if (String.IsNullOrWhiteSpace(tbPartnerJID.Text))
@@ -94,10 +156,15 @@ namespace Schiffchen
                 catch (Exception)
                 {
                     MessageBox.Show("Please enter a valid Jabber-ID of your game partner.", "Error", MessageBoxButton.OK);
-                }                
+                }
             }
         }
 
+        /// <summary>
+        /// Is called when the button for searching a partner is clicked
+        /// </summary>
+        /// <param name="sender">The clicked button</param>
+        /// <param name="e">The event arguments</param>
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
             if (btnSearch.Content.Equals("Search Partner"))
@@ -106,7 +173,7 @@ namespace Schiffchen
                 lblSearchState.Text = "Connecting to Matchmaker...";
                 btnSearch.Content = "Stop Search";
                 AppCache.XmppManager.RequestPlayerFromMatchmaker();
-                AppCache.XmppManager.IncomingPing += new EventHandler<Event.MessageEventArgs>(XmppManager_IncomingPing);
+                AppCache.XmppManager.IncomingQueuingPing += new EventHandler<Event.MessageEventArgs>(XmppManager_IncomingPing);
             }
             else
             {
@@ -114,10 +181,16 @@ namespace Schiffchen
                 ledWaitingState.Visibility = System.Windows.Visibility.Collapsed;
                 btnSearch.Content = "Search Partner";
                 AppCache.XmppManager.StopRequestPlayerFromMatchmaker();
-                AppCache.XmppManager.IncomingPing -= XmppManager_IncomingPing;
+                AppCache.XmppManager.IncomingQueuingPing -= XmppManager_IncomingPing;
             }
         }
 
+        /// <summary>
+        /// Is called when a ping by the matchmaker is received.
+        /// Displays the state to the app.
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The message event arguments</param>
         void XmppManager_IncomingPing(object sender, Event.MessageEventArgs e)
         {
             this.Dispatcher.BeginInvoke(delegate
@@ -126,29 +199,8 @@ namespace Schiffchen
                 this.ledWaitingState.Fill = AppCache.cGreen;
             });
         }
-       
 
-        public void StartGame(Match newMatch)
-        {
-            AppCache.CurrentMatch = newMatch;
-            NavigationService.Navigate(new Uri("/GamePage.xaml", UriKind.Relative));
-        }
+        #endregion
 
-        public void CheckDisplayedComponents()
-        {
-            if (AppCache.XmppManager == null || AppCache.XmppManager.Client == null || AppCache.XmppManager.Client.XMPPState != XMPPState.Ready)
-            {
-                btnDirect.IsEnabled = false;
-                btnSearch.IsEnabled = false;
-                tbPartnerJID.IsEnabled = false;
-            }
-            else
-            {
-                btnDirect.IsEnabled = true;
-                btnSearch.IsEnabled = true;
-                tbPartnerJID.IsEnabled = true;
-            }
-        }
- 
     }
 }

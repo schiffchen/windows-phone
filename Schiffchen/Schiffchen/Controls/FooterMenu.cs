@@ -10,7 +10,9 @@ using Schiffchen.GameElemens;
 namespace Schiffchen.Controls
 {
     
-
+    /// <summary>
+    /// Defines a menu, which can hold dices and buttons
+    /// </summary>
     public class FooterMenu
     {
         public Rectangle Rectangle { get; private set; }
@@ -20,6 +22,11 @@ namespace Schiffchen.Controls
         private float alpha = 0.5f;
         private Color color;
    
+        /// <summary>
+        /// Creates a new instance of the FooterMenu
+        /// </summary>
+        /// <param name="TopLine">The top line of the menu. Should be below other content</param>
+        /// <param name="Height">The height of the menu.</param>
         public FooterMenu(int TopLine, int Height)
         {
             this.Rectangle = new Rectangle(0, TopLine, DeviceCache.ScreenWidth, Height);
@@ -29,6 +36,11 @@ namespace Schiffchen.Controls
             Dices = new Dice[2];
         }
 
+        /// <summary>
+        /// Adds an IconButton to the menu.
+        /// If no free slot is available, an error will be thrown.
+        /// </summary>
+        /// <param name="button">The button which should be added</param>
         public void AddButton(IconButton button)
         {
             if (Buttons[1] == null)
@@ -47,6 +59,10 @@ namespace Schiffchen.Controls
             }
         }
 
+        /// <summary>
+        /// Removes the given button from the menu
+        /// </summary>
+        /// <param name="button">The button to remove</param>
         public void RemoveButton(IconButton button)
         {
             for (int i = 0; i < Buttons.Length; i++)
@@ -59,6 +75,10 @@ namespace Schiffchen.Controls
             }
         }
 
+        /// <summary>
+        /// Removes the button with the given ID from the menu
+        /// </summary>
+        /// <param name="id">The ID of the button to remove</param>
         public void RemoveButton(String id)
         {
             for (int i = 0; i < Buttons.Length; i++)
@@ -71,6 +91,11 @@ namespace Schiffchen.Controls
             }
         }
 
+        /// <summary>
+        /// Returns the button with the given ID
+        /// </summary>
+        /// <param name="ID">The ID of the button to search for</param>
+        /// <returns>The button with the given ID</returns>
         public IconButton Get(String ID)
         {
             for (int i = 0; i < Buttons.Length; i++)
@@ -83,8 +108,22 @@ namespace Schiffchen.Controls
             return null;
         }
 
-      
 
+        /// <summary>
+        /// Removes all buttons from the menu
+        /// </summary>
+        public void RemoveAllButtons()
+        {
+            for (int i = 0; i < Buttons.Length; i++)
+            {
+                Buttons[i] = null;
+            }
+        }
+      
+        /// <summary>
+        /// Draws the Menu and its buttons and dices to the screen
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(TextureManager.Black, Rectangle, color);
@@ -102,17 +141,6 @@ namespace Schiffchen.Controls
                     Dices[i].Draw(spriteBatch);
                 }
             }
-        }
-
-        public void RemoveAllButtons()
-        {
-            for (int i = 0; i < Buttons.Length; i++)
-            {
-                Buttons[i] = null;
-            }
-        }
-
-        
-
+        }        
     }
 }

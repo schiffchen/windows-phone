@@ -12,6 +12,9 @@ using Schiffchen.Event;
 
 namespace Schiffchen.GameElemens
 {
+    /// <summary>
+    /// Represents a single playground with fields
+    /// </summary>
     public class Playground
     {
         public static int PLAYGROUND_SIZE = 10;
@@ -37,7 +40,10 @@ namespace Schiffchen.GameElemens
         private Boolean isReduceToMinimap;
         #endregion
 
-
+        /// <summary>
+        /// Creates a new instance of the playground
+        /// </summary>
+        /// <param name="mode">The never changing mode of this playground</param>
         public Playground(PlaygroundMode mode)
         {
             this.PlaygroundMode = mode;
@@ -56,6 +62,9 @@ namespace Schiffchen.GameElemens
             CalculateFields();
         }
 
+        /// <summary>
+        /// Refreshes the playground by glueing all ships to the fields
+        /// </summary>
         public void Refresh()
         {
             foreach (Ship s in AppCache.CurrentMatch.OwnShips)
@@ -71,6 +80,9 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Increases the size of the playground
+        /// </summary>
         private void Increase()
         {
             this.SizeRatio = MathHelper.Clamp(this.SizeRatio + 0.1f, 0.3f, 1f);
@@ -78,6 +90,9 @@ namespace Schiffchen.GameElemens
             this.CalculateFields();
         }
 
+        /// <summary>
+        /// Reduces the size of the playground
+        /// </summary>
         private void Reduce()
         {
             this.SizeRatio = MathHelper.Clamp(this.SizeRatio - 0.1f, 0.3f, 1f);
@@ -85,16 +100,25 @@ namespace Schiffchen.GameElemens
             this.CalculateFields();
         }
 
+        /// <summary>
+        /// Reduce the playground till it is a minimap
+        /// </summary>
         public void ReduceToMinimap()
         {
             this.isReduceToMinimap = true;
         }
 
+        /// <summary>
+        /// Increase the playground till it is the main view
+        /// </summary>
         public void IncreaseToMain()
         {
             this.isIncreaseToMain = true;
         }
 
+        /// <summary>
+        /// Resets all field background colors to transparent
+        /// </summary>
         public void ResetFieldColors()
         {
             foreach (Field f in this.fields)
@@ -103,7 +127,35 @@ namespace Schiffchen.GameElemens
             }
         }
 
-        public void CalculateFields()
+        /// <summary>
+        /// Calculates the sizes of the fields by taking the current scale rate of the playground
+        /// </summary>
+        private void CalculateSizes()
+        {
+            GridWidth = (DeviceCache.ScreenWidth - (DeviceCache.ScreenWidth * 0.1)) * this.SizeRatio;
+            GridHeight = (DeviceCache.ScreenHeight - (DeviceCache.ScreenHeight * 0.4)) * this.SizeRatio;
+            GridLeft = (DeviceCache.ScreenWidth * 0.05);
+
+
+            FieldWidth = GridWidth / PLAYGROUND_SIZE;
+            FieldHeight = FieldWidth;
+
+            if (this.SizeRatio == 1f)
+            {
+                GridTop = (DeviceCache.ScreenHeight - (FieldHeight * PLAYGROUND_SIZE) - 200);
+            }
+            else
+            {
+                GridTop = 20;
+            }
+            this.FieldSize = new Size(FieldWidth, FieldHeight);
+            this.Rectangle = new Microsoft.Xna.Framework.Rectangle(Convert.ToInt32(GridLeft), Convert.ToInt32(GridTop), Convert.ToInt32(GridWidth), Convert.ToInt32(GridHeight));
+        }
+
+        /// <summary>
+        /// Calculates the proportions and positions of all fields by taking the current scale rate of this playground
+        /// </summary>
+        private void CalculateFields()
         {
             bool firstStarted = false;
             if (fields == null)
@@ -130,6 +182,7 @@ namespace Schiffchen.GameElemens
                         }
                     }
 
+                    // This global variables will only be set at the first time the calculating is done
                     if (firstStarted)
                     {
                         if (r == 0 && c == PLAYGROUND_SIZE - 1)
@@ -152,6 +205,12 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Checks if the playground is clicked and calls the OnClick-Event.
+        /// If it's a minimap, the OnClick-Event is called.
+        /// If it's a normal map and it's our turn, the OnTargetSelected-Event for the specific clicked field is called.
+        /// </summary>
+        /// <param name="gs">The GestureSample</param>
         public void CheckClick(GestureSample gs)
         {
             if (this.PlaygroundMode == Logic.Enum.PlaygroundMode.Minimap)
@@ -178,28 +237,41 @@ namespace Schiffchen.GameElemens
             }
         }
 
-        public void CalculateSizes()
+        /// <summary>
+        /// Is fired when this playground is clicked when beeing a minimap.
+        /// </summary>
+        /// <param name="e">The event arguments</param>
+        protected virtual void OnClick(EventArgs e)
         {
-            GridWidth = (DeviceCache.ScreenWidth - (DeviceCache.ScreenWidth * 0.1)) * this.SizeRatio;
-            GridHeight = (DeviceCache.ScreenHeight - (DeviceCache.ScreenHeight * 0.4)) * this.SizeRatio;
-            GridLeft = (DeviceCache.ScreenWidth * 0.05);
+            EventHandler<EventArgs> handler = Click;
 
-
-            FieldWidth = GridWidth / PLAYGROUND_SIZE;
-            FieldHeight = FieldWidth;
-   
-            if (this.SizeRatio == 1f)
+            // Event will be null if there are no subscribers
+            if (handler != null)
             {
-                GridTop = (DeviceCache.ScreenHeight - (FieldHeight * PLAYGROUND_SIZE) - 200);
+                // Use the () operator to raise the event.
+                handler(this, e);
             }
-            else
-            {
-                GridTop = 20;
-            }
-            this.FieldSize = new Size(FieldWidth, FieldHeight);
-            this.Rectangle = new Microsoft.Xna.Framework.Rectangle(Convert.ToInt32(GridLeft), Convert.ToInt32(GridTop), Convert.ToInt32(GridWidth), Convert.ToInt32(GridHeight));
         }
 
+        /// <summary>
+        /// Is fired when a single field is selected when beeing the normal sized targeting map.
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnTargetSelected(ShootEventArgs e)
+        {
+            EventHandler<ShootEventArgs> handler = TargetSelected;
+
+            // Event will be null if there are no subscribers
+            if (handler != null)
+            {
+                // Use the () operator to raise the event.
+                handler(this, e);
+            }
+        }
+
+        /// <summary>
+        /// Manages the update logic of this playground
+        /// </summary>
         public void Update()
         {
             if (isIncreaseToMain)
@@ -224,6 +296,10 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Draws the playground and its fields to the screen
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public void Draw(SpriteBatch spriteBatch)
         {
             for (int r = 0; r < PLAYGROUND_SIZE; r++)
@@ -234,30 +310,5 @@ namespace Schiffchen.GameElemens
                 }
             }
         }
-
-        protected virtual void OnClick(EventArgs e)
-        {
-            EventHandler<EventArgs> handler = Click;
-
-            // Event will be null if there are no subscribers
-            if (handler != null)
-            {
-                // Use the () operator to raise the event.
-                handler(this, e);
-            }
-        }
-
-        protected virtual void OnTargetSelected(ShootEventArgs e)
-        {
-            EventHandler<ShootEventArgs> handler = TargetSelected;
-
-            // Event will be null if there are no subscribers
-            if (handler != null)
-            {
-                // Use the () operator to raise the event.
-                handler(this, e);
-            }
-        }
-
     }
 }

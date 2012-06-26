@@ -5,6 +5,9 @@ using Schiffchen.Logic.Messages;
 
 namespace Schiffchen.GameElemens
 {
+    /// <summary>
+    /// Defines a single shot with coordinates, optionally result and ShipInfo
+    /// </summary>
     public class Shot
     {
         public Int32 X { get; set; }

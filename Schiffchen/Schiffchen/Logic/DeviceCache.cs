@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework;
 
 namespace Schiffchen
 {
+    /// <summary>
+    /// Defines the cache of the game, where global variables for the current rendering environment and device are stored
+    /// </summary>
     public class DeviceCache
     {
         public static Int32 ScreenWidth;

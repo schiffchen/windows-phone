@@ -1,6 +1,9 @@
 ﻿
-namespace Schiffchen
+namespace Schiffchen.Logic.Enum
 {
+    /// <summary>
+    /// Defines the type of a ship
+    /// </summary>
     public enum ShipType
     {
 	/**

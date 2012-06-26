@@ -13,6 +13,9 @@ using System.Net.XMPP;
 
 namespace Schiffchen.Logic.Messages
 {
+    /// <summary>
+    /// Defines a match message, which is sent or received over XMPP
+    /// </summary>
     public class MatchMessage : BattleshipMessage
     {
         public MatchAction Action;
@@ -29,8 +32,13 @@ namespace Schiffchen.Logic.Messages
 
         public ShipInfo ShipInfo;
 
+        /// <summary>
+        /// Creates a new entity of the MatchMessage
+        /// </summary>
+        /// <param name="action">The current action</param>
+        /// <param name="dict">The dictionary with parameters</param>
         public MatchMessage(MatchAction action, Dictionary<string, object> dict)
-            : base(Type.Match)
+            : base(Schiffchen.Logic.Enum.Type.Match)
         {
             this.Action = action;
             switch (action)
@@ -55,11 +63,21 @@ namespace Schiffchen.Logic.Messages
             }
         }
 
+        /// <summary>
+        /// Generates the XML for sending over XMPP
+        /// </summary>
+        /// <returns>An XML string</returns>
         public String ToSendXML()
         {
             return this.ToSendXML(this.From, this.To);
         }
 
+        /// <summary>
+        /// Generates the XML for sending over XMPP
+        /// </summary>
+        /// <param name="from">The Jabber-ID of the sender</param>
+        /// <param name="to">The Jabber-ID of the receiver</param>
+        /// <returns>An XML string</returns>
         public String ToSendXML(JID from, JID to)
         {
             String s = "<message from=\"" + from.FullJID + "\" id=\"" + Guid.NewGuid() + "\" to=\"" + to.FullJID + "\" type=\"normal\">\n<battleship xmlns=\"http://battleship.me/xmlns/\">";

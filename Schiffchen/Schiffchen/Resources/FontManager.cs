@@ -7,6 +7,9 @@ using System.Text;
 
 namespace Schiffchen.Resources
 {
+    /// <summary>
+    /// Handles all used fonts in the XNA part of the game
+    /// </summary>
     public static class FontManager
     {
 
@@ -17,7 +20,10 @@ namespace Schiffchen.Resources
         public static SpriteFont DiceFont;
 
 
-
+        /// <summary>
+        /// Loads all content
+        /// </summary>
+        /// <param name="Content">The ContentManager</param>
         public static void LoadContent(ContentManager Content)
         {
             MenuFont = Content.Load<SpriteFont>("font\\menuFont");

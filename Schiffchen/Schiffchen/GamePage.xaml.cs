@@ -18,6 +18,9 @@ using Schiffchen.Logic;
 
 namespace Schiffchen
 {
+    /// <summary>
+    /// This is the xna game page, where a match will be rendered
+    /// </summary>
     public partial class GamePage : PhoneApplicationPage
     {
         ContentManager contentManager;
@@ -26,7 +29,9 @@ namespace Schiffchen
         TiledBackground background;
     
 
-
+        /// <summary>
+        /// Initialize all components and timers
+        /// </summary>
         public GamePage()
         {
             InitializeComponent();
@@ -42,6 +47,10 @@ namespace Schiffchen
 
         }
 
+        /// <summary>
+        /// Loads the content, fills the global variables, starts the timer
+        /// </summary>
+        /// <param name="e">The navigation event arguments</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             // Freigabemodus des Grafikgeräts zum Aktivieren des XNA-Renderings festlegen
@@ -69,6 +78,10 @@ namespace Schiffchen
             base.OnNavigatedTo(e);
         }
 
+        /// <summary>
+        /// Stops the timer
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             // Timer beenden
@@ -81,8 +94,7 @@ namespace Schiffchen
         }
 
         /// <summary>
-        /// Ermöglicht der Seite die Ausführung von Logik, z. B. zur Aktualisierung von Welten,
-        /// Kollisionsprüfung, Eingabeerfassung und Audiowiedergabe.
+        /// Updates all relevant updateable components
         /// </summary>
         private void OnUpdate(object sender, GameTimerEventArgs e)
         {
@@ -99,15 +111,12 @@ namespace Schiffchen
         }
 
         /// <summary>
-        /// Ermöglicht der Seite eigene Zeichenvorgänge.
+        /// Draws all relevant drawable components
         /// </summary>
         private void OnDraw(object sender, GameTimerEventArgs e)
         {
             SharedGraphicsDeviceManager.Current.GraphicsDevice.Clear(Color.Black);
 
-
-            //spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Opaque, SamplerState.LinearWrap, DepthStencilState.Default, RasterizerState.CullNone);
-            //spriteBatch.Begin();
             spriteBatch.Begin();
             background.Draw(spriteBatch);
             AppCache.CurrentMatch.Draw(spriteBatch);

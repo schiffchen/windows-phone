@@ -10,7 +10,9 @@ using Microsoft.Xna.Framework.Input.Touch;
 
 namespace Schiffchen.GameElemens
 {
-
+    /// <summary>
+    /// Represents a dice
+    /// </summary>
     public class Dice
     {
         public String Value { get; private set; }
@@ -32,6 +34,11 @@ namespace Schiffchen.GameElemens
         private int blinkCounter;
         private Texture2D blinkColor;
 
+        /// <summary>
+        /// Creates a new instance of a dice
+        /// </summary>
+        /// <param name="pos">The target position</param>
+        /// <param name="caption">The caption text</param>
         public Dice(Vector2 pos, String caption)
         {
             this.Rectangle = new Rectangle(Convert.ToInt32(pos.X) + 20, DeviceCache.BelowGrid + Convert.ToInt32(pos.Y), 80, 80);
@@ -49,6 +56,11 @@ namespace Schiffchen.GameElemens
             
         }
 
+        /// <summary>
+        /// Is called when the timer ticks and is part of the rolling animation
+        /// </summary>
+        /// <param name="sender">The timer</param>
+        /// <param name="e">The event arguments</param>
         void timer_Tick(object sender, EventArgs e)
         {
             timerCounter++;
@@ -66,12 +78,19 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Rolls the dice by starting the rolling timer
+        /// </summary>
         public void Roll()
         {
             this.rnd = new Random(DateTime.Now.Millisecond);
             timer.Start();
         }
 
+        /// <summary>
+        /// Rolls the dice by starting the rolling timer
+        /// </summary>
+        /// <param name="value">The value to be displayed after rolling</param>
         public void Roll(int value)
         {
             this.rnd = new Random(DateTime.Now.Millisecond);
@@ -79,11 +98,18 @@ namespace Schiffchen.GameElemens
             timer.Start();
         }
 
+        /// <summary>
+        /// Sets the displayd spots
+        /// </summary>
+        /// <param name="value"></param>
         public void SetValue(int value)
         {
             this.Value = Convert.ToString(value);
         }
 
+        /// <summary>
+        /// Resets the displayed value to "?"
+        /// </summary>
         public void ResetValue()
         {
             blinkCounter = 0;
@@ -92,6 +118,10 @@ namespace Schiffchen.GameElemens
             this.Value = "?";
         }
 
+        /// <summary>
+        /// Checks if the dice is clicked
+        /// </summary>
+        /// <param name="gs">The given GestureSample</param>
         public void CheckClick(GestureSample gs)
         {
             if (!this.ReadOnly)
@@ -105,6 +135,10 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Starts the blink animation with the given color
+        /// </summary>
+        /// <param name="BlinkColor">The color</param>
         public void Blink(Texture2D BlinkColor)
         {
             this.blinkColor = BlinkColor;
@@ -114,6 +148,12 @@ namespace Schiffchen.GameElemens
             blinkTimer.Start();
         }
 
+        /// <summary>
+        /// Is called when the blinking timer ticks.
+        /// Toggles the current blinkstate.
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The event arguments</param>
         void blinkTimer_Tick(object sender, EventArgs e)
         {
             blinkState = !blinkState;
@@ -126,6 +166,10 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Fires when the rolling of a dice is finished
+        /// </summary>
+        /// <param name="e">The dice event arguments</param>
         protected virtual void OnRollingFinished(RollingDiceEventArgs e)
         {
             EventHandler<RollingDiceEventArgs> handler = RollingFinish;
@@ -138,6 +182,10 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Fires when the dice is clicked
+        /// </summary>
+        /// <param name="e">The event arguments</param>
         protected virtual void OnClick(EventArgs e)
         {
             EventHandler<EventArgs> handler = Click;
@@ -150,6 +198,10 @@ namespace Schiffchen.GameElemens
             }
         }
 
+        /// <summary>
+        /// Fires when the blink animation of the dice is finished
+        /// </summary>
+        /// <param name="e">The event arguments</param>
         protected virtual void OnBlinkCompleted(EventArgs e)
         {
             EventHandler<EventArgs> handler = BlinkComplete;
@@ -162,7 +214,10 @@ namespace Schiffchen.GameElemens
             }
         }
 
-
+        /// <summary>
+        /// Draws the dice to the screen
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public void Draw(SpriteBatch spriteBatch)
         {
             if (blinkState)

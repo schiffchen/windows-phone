@@ -8,6 +8,9 @@ using Microsoft.Xna.Framework;
 
 namespace Schiffchen.Resources
 {
+    /// <summary>
+    /// Handles all used textures in the XNA part of the game
+    /// </summary>
     public static class TextureManager
     {
         public static Texture2D GameBackground;
@@ -40,6 +43,11 @@ namespace Schiffchen.Resources
         public static Texture2D SymbolWaiting;
         public static Texture2D SymbolOffline;
 
+        /// <summary>
+        /// Loads all Content
+        /// </summary>
+        /// <param name="Content">The ContentManager</param>
+        /// <param name="device">The GrahicsDevice</param>
         public static void LoadContent(Microsoft.Xna.Framework.Content.ContentManager Content, GraphicsDevice device)
         {
             GameBackground = Content.Load<Texture2D>("background\\water");
