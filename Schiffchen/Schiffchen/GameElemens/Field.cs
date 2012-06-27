@@ -114,11 +114,18 @@ namespace Schiffchen.GameElemens
             spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), 2, Convert.ToInt32(Size.Height)), Color.White); // Left
             spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X + Size.Width), Convert.ToInt32(Position.Y), 2, Convert.ToInt32(Size.Height)), Color.White); // Right
             spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y), Convert.ToInt32(Size.Width), 2), Color.White); // Top
-            spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y + Size.Height), Convert.ToInt32(Size.Width), 2), Color.White); // Bottom
+            spriteBatch.Draw(TextureManager.White, new Rectangle(Convert.ToInt32(Position.X), Convert.ToInt32(Position.Y + Size.Height), Convert.ToInt32(Size.Width), 2), Color.White); // Bottom                                   
+        }
 
-            
-            
-            switch (FieldState) {
+        /// <summary>
+        /// Draws the FieldState-Icon like Water or Hit.
+        /// This method should be called after the ships has been drawn
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        public void DrawFieldState(SpriteBatch spriteBatch)
+        {
+            switch (FieldState)
+            {
                 case Logic.Enum.FieldState.Hit:
                     float symratio1 = (float)((this.Size.Width - 4) / TextureManager.FieldHit.Width);
                     spriteBatch.Draw(TextureManager.FieldHit, new Vector2(Rectangle.X + 2, Rectangle.Y + 2), null, Color.White, 0f, Vector2.Zero, symratio1, SpriteEffects.None, 1f);

@@ -8,6 +8,7 @@ namespace Schiffchen.Logic.Enum
     {
         ShipPlacement,
         Dicing,
-        Playing
+        Playing,
+        Finished
     }
 }

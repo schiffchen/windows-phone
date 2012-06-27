@@ -93,7 +93,7 @@ namespace Schiffchen.Logic.Messages
                     s += "<shoot x=\"" + this.X + "\" y=\"" + this.Y + "\" result=\"" + this.Result + "\" />";
                     if (this.ShipInfo != null)
                     {
-                        s += "<ship x=\"" + this.ShipInfo.X + "\" y=\"" + this.ShipInfo.Y + "\" size=\"" + this.ShipInfo.Size + "\" orientation=\"" + this.ShipInfo.Orientation.ToString().ToLower() + "\" destroyed=\"" + this.ShipInfo.Destroyed.ToString() + "\" />";
+                        s += "<ship x=\"" + this.ShipInfo.X + "\" y=\"" + this.ShipInfo.Y + "\" size=\"" + this.ShipInfo.Size + "\" orientation=\"" + this.ShipInfo.Orientation.ToString().ToLower() + "\" destroyed=\"" + this.ShipInfo.Destroyed.ToString().ToLower() + "\" />";
                     }
                     break;
                 case MatchAction.Ping:

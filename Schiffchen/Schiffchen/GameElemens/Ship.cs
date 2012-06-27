@@ -221,10 +221,20 @@ namespace Schiffchen.GameElemens
         /// <returns></returns>
         private float calculateSizeRatio()
         {
-            if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
-                return (float)AppCache.CurrentMatch.OwnPlayground.FieldSize.Width / this.shipTexture.Width;
+            Playground pg = null;
+            if (this.Owner == AppCache.CurrentMatch.OwnJID)
+            {
+                pg = AppCache.CurrentMatch.OwnPlayground;
+            }
             else
-                return (float)AppCache.CurrentMatch.OwnPlayground.FieldSize.Width / this.shipTexture.Height;
+            {
+                pg = AppCache.CurrentMatch.ShootingPlayground;
+            }
+
+            if (this.Orientation == System.Windows.Controls.Orientation.Vertical)
+                return (float)pg.FieldSize.Width / this.shipTexture.Width;
+            else
+                return (float)pg.FieldSize.Width / this.shipTexture.Height;
         }
 
         /// <summary>
@@ -313,7 +323,7 @@ namespace Schiffchen.GameElemens
         /// <param name="spriteBatch">The SpriteBatch for drawing</param>
         public void Draw(SpriteBatch spriteBatch)
         {
-                spriteBatch.Draw(shipTexture, new Vector2(Position.X, Position.Y), null, OverlayColor, 0f, Vector2.Zero, calculateSizeRatio(), SpriteEffects.None, 0f);
+            spriteBatch.Draw(shipTexture, new Vector2(Position.X, Position.Y), null, OverlayColor, 0f, Vector2.Zero, calculateSizeRatio(), SpriteEffects.None, 0f);            
         }
     }
 }

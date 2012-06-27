@@ -310,5 +310,21 @@ namespace Schiffchen.GameElemens
                 }
             }
         }
+
+        /// <summary>
+        /// Draws the FieldState-Icon (like Water or Hit) for each field.
+        /// This method should be called after the ships has been drawn.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
+        public void DrawFieldStates(SpriteBatch spriteBatch)
+        {
+            for (int r = 0; r < PLAYGROUND_SIZE; r++)
+            {
+                for (int c = 0; c < PLAYGROUND_SIZE; c++)
+                {
+                    fields[r, c].DrawFieldState(spriteBatch);
+                }
+            }
+        }
     }
 }

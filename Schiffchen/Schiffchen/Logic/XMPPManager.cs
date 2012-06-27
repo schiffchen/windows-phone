@@ -228,11 +228,11 @@ namespace Schiffchen.Logic
                             {
                                 if (mMessage.ShipInfo != null)
                                 {
-                                    this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result));
+                                    this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result, mMessage.ShipInfo));
                                 }
                                 else
                                 {
-                                    this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result, mMessage.ShipInfo));
+                                    this.OnIncomingShotResult(new ShootEventArgs(mMessage.X, mMessage.Y, mMessage.Result));
                                 }                                
                             }
                             break;

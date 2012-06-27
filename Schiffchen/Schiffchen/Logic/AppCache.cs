@@ -88,10 +88,10 @@ namespace Schiffchen.Logic
                 switch (AppCache.CurrentMatch.MatchState)
                 {
                     case Enum.MatchState.ShipPlacement:
-                        spriteBatch.DrawString(FontManager.GameFont, "Place your ships, by moving\n them to the playground", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.White);
+                        spriteBatch.DrawString(FontManager.GameFont, "Place your ships, by moving\nthem to the playground", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.White);
                         break;
                     case Enum.MatchState.Dicing:
-                        spriteBatch.DrawString(FontManager.GameFont, "Roll the dice to determine,\n who begins", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.White);
+                        spriteBatch.DrawString(FontManager.GameFont, "Roll the dice to determine,\nwho begins", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.White);
                         break;
                     case Enum.MatchState.Playing:                        
                         if (AppCache.CurrentMatch.IsMyTurn)
@@ -103,12 +103,24 @@ namespace Schiffchen.Logic
                             spriteBatch.DrawString(FontManager.InfoFont, "Partner's Turn!", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.Red);
                         }
                         break;
+                    case Enum.MatchState.Finished:
+                        if (AppCache.CurrentMatch.MatchWinner == AppCache.CurrentMatch.OwnJID)
+                        {
+                            spriteBatch.DrawString(FontManager.InfoFont, "You've won!", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.LightBlue);
+                        }
+                        else if (AppCache.CurrentMatch.MatchWinner == AppCache.CurrentMatch.PartnerJID)
+                        {
+                            spriteBatch.DrawString(FontManager.InfoFont, "You've lost!", new Vector2(DeviceCache.RightOfMinimap.X, DeviceCache.RightOfMinimap.Y + 50), Microsoft.Xna.Framework.Color.Red);
+                        }
+                        break;
                 }
             }
             
 
             #endregion
         }
+        
+
 
         /// <summary>
         /// Updates all cached static things

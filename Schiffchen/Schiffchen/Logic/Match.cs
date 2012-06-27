@@ -34,6 +34,7 @@ namespace Schiffchen.Logic
         private Random rnd;
         public Playground OwnPlayground { get; private set; }
         public Playground ShootingPlayground { get; private set; }
+        public JID MatchWinner;
 
         private Shot SendedShot;
         private Boolean GamestateSended;
@@ -42,6 +43,7 @@ namespace Schiffchen.Logic
         private IconButton btnAccept;
         private IconButton btnTurn;
         private Boolean DiceWinnerChecked;
+        
 
         private int PartnersPreDice;
         private DispatcherTimer pingTimer;
@@ -67,6 +69,7 @@ namespace Schiffchen.Logic
             this.PartnerJID = partner;
             this.Started = DateTime.Now;
             this.rnd = new Random(DateTime.Now.Millisecond);
+            this.MatchWinner = null;
         }
 
         /// <summary>
@@ -420,6 +423,15 @@ namespace Schiffchen.Logic
                 {
                     Partner.SendGamestate(looser.BareJID);
                     this.GamestateSended = true;
+                    this.MatchState = Enum.MatchState.Finished;
+                    if (looser == OwnJID)
+                    {
+                        this.MatchWinner = PartnerJID;
+                    }
+                    else
+                    {
+                        this.MatchWinner = OwnJID;
+                    }
                 }
             }
         }
@@ -518,11 +530,11 @@ namespace Schiffchen.Logic
                 else
                 {
                     // Hitted a ship
-                    AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+                    AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
                     
                     /// Hier kracht es noch! Es ist kein Schiff referenziert!!
-                    Ship sh = AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip;
-                    sh.HitOnField(AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1]);
+                    Ship sh = AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip;
+                    sh.HitOnField(AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1]);
                     SoundManager.SoundExplosion.Play();
                     ShipInfo shipInfo = null;
                     if (sh.IsDestroyed)
@@ -532,6 +544,7 @@ namespace Schiffchen.Logic
                         shipInfo.Y = sh.StartField.Y;
                         shipInfo.Size = sh.Size;
                         shipInfo.Orientation = sh.Orientation;
+                        shipInfo.Destroyed = sh.IsDestroyed;
                     }
 
                     Partner.TransferShotResult(e.X, e.Y, true, shipInfo);
@@ -572,7 +585,32 @@ namespace Schiffchen.Logic
                     // Here we still need logic, if a ship of the partner is destroyed!
                     if (e.ShipInfo != null)
                     {
+                        Boolean stop = false;
+                        for (int i = 0; (i < PartnerShips.Length && !stop); i++)
+                        {
+                            if (PartnerShips[i] == null)
+                            {
+                                ShipType type = ShipType.AIRCRAFT_CARRIER;
+                                switch (e.ShipInfo.Size) {
+                                    case 2:
+                                        type = ShipType.DESTROYER;
+                                        break;
+                                    case 3:
+                                        type = ShipType.SUBMARINE;
+                                        break;
+                                    case 4:
+                                        type = ShipType.BATTLESHIP;
+                                        break;
+                                    case 5:
+                                        type = ShipType.AIRCRAFT_CARRIER;
+                                        break;
+                                }
 
+                                Ship s = new GameElemens.Ship(PartnerJID, type, e.ShipInfo.Orientation, ShootingPlayground.fields[e.ShipInfo.Y - 1, e.ShipInfo.X - 1]);
+                                PartnerShips[i] = s;
+                                stop = true;
+                            }
+                        }
                     }
                 }
             }
@@ -699,8 +737,19 @@ namespace Schiffchen.Logic
             FooterMenu.Draw(spriteBatch);
             foreach (Ship s in this.OwnShips)
             {
-                s.Draw(spriteBatch);
+                if (s != null)
+                    s.Draw(spriteBatch);
             }
+
+            foreach (Ship s in this.PartnerShips)
+            {
+                if (s!=null)
+                    s.Draw(spriteBatch);
+            }
+
+            // Now, after all things has been drawn, we draw the FieldState, which should be on the hightest layer
+            this.OwnPlayground.DrawFieldStates(spriteBatch);
+            this.ShootingPlayground.DrawFieldStates(spriteBatch);
         }
         #endregion
     }
