@@ -174,7 +174,7 @@ namespace Schiffchen.Logic
 
                         s = "Searching partner. Please wait...";
                         this.queueID = qMessage.ID;
-                        brush = AppCache.cGreen;
+                        brush = AppCache.cYellow;
                         
                     }
                     else if (qMessage.Action == Enum.QueueingAction.ping)
@@ -289,7 +289,7 @@ namespace Schiffchen.Logic
                 Matchmaker.Ping(this);
                 mainPage.Dispatcher.BeginInvoke(delegate
                 {
-                    mainPage.ledWaitingState.Fill = AppCache.cYellow;
+                    mainPage.ledWaitingState.Fill = AppCache.cOrange;
                 });
             }
             else

@@ -172,6 +172,7 @@ namespace Schiffchen
                 ledWaitingState.Visibility = System.Windows.Visibility.Visible;
                 lblSearchState.Text = "Connecting to Matchmaker...";
                 btnSearch.Content = "Stop Search";
+                ledWaitingState.Fill = AppCache.cOrange;
                 AppCache.XmppManager.RequestPlayerFromMatchmaker();
                 AppCache.XmppManager.IncomingQueuingPing += new EventHandler<Event.MessageEventArgs>(XmppManager_IncomingPing);
             }
@@ -196,7 +197,7 @@ namespace Schiffchen
             this.Dispatcher.BeginInvoke(delegate
             {
                 this.lblSearchState.Text = "Searching partner. Please wait...";
-                this.ledWaitingState.Fill = AppCache.cGreen;
+                this.ledWaitingState.Fill = AppCache.cYellow;
             });
         }
 

@@ -34,6 +34,7 @@ namespace Schiffchen.Logic
         public static System.Windows.Media.SolidColorBrush cRed;
         public static  System.Windows.Media.SolidColorBrush cGreen;
         public static System.Windows.Media.SolidColorBrush cYellow;
+        public static System.Windows.Media.SolidColorBrush cOrange;
 
         /// <summary>
         /// Represents the touched ship
@@ -54,6 +55,7 @@ namespace Schiffchen.Logic
             cRed = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 190, 0, 0));
             cGreen = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 68, 140, 0));
             cYellow = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 224, 98));
+            cOrange = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 242, 159, 1));
 
         }
 
