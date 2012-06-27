@@ -59,6 +59,7 @@ namespace Schiffchen.GameElemens
             this.HitPoints = new Dictionary<int, bool>();
             this.Orientation = or;
             this.Position = targetField.Position;
+            this.IsDestroyed = false;
             this.OverlayColor = Color.White;
             targetField.ReferencedShip = this;
             StartField = targetField;
@@ -83,6 +84,7 @@ namespace Schiffchen.GameElemens
             this.ShipType = type;
             this.HitPoints = new Dictionary<int, bool>();
             this.OverlayColor = Color.White;
+            this.IsDestroyed = false;
 
             switch (type)
             {
@@ -161,7 +163,8 @@ namespace Schiffchen.GameElemens
             {
                 if (!this.HitPoints[i])
                 {
-                    destroyed = false;
+                    this.IsDestroyed = false;
+                    return;
                 }
             }
             this.IsDestroyed = destroyed;

@@ -146,10 +146,13 @@ namespace Schiffchen.Logic
                 if (s != null && !s.IsDestroyed)
                     allOwnDestroyed = false;
             }
-            foreach (Ship s in this.PartnerShips)
+
+            for (int i = 0; i < this.PartnerShips.Length; i++)
             {
-                if (s != null && !s.IsDestroyed)
+                if (this.PartnerShips[i] == null || !this.PartnerShips[i].IsDestroyed)
+                {
                     allPartnerDestroyed = false;
+                }
             }
             if (allOwnDestroyed)
             {
@@ -520,21 +523,21 @@ namespace Schiffchen.Logic
             if (!this.IsMyTurn)
             {
 
-                if (AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip == null)
+                if (AppCache.CurrentMatch.OwnPlayground.fields[e.Y, e.X].ReferencedShip == null)
                 {
                     // Water
-                    AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
+                    AppCache.CurrentMatch.OwnPlayground.fields[e.Y, e.X].FieldState = FieldState.Water;
                     SoundManager.SoundWater.Play();
                     Partner.TransferShotResult(e.X, e.Y, false, null);
                 }
                 else
                 {
                     // Hitted a ship
-                    AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
+                    AppCache.CurrentMatch.OwnPlayground.fields[e.Y, e.X].FieldState = FieldState.Hit;
                     
                     /// Hier kracht es noch! Es ist kein Schiff referenziert!!
-                    Ship sh = AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1].ReferencedShip;
-                    sh.HitOnField(AppCache.CurrentMatch.OwnPlayground.fields[e.Y - 1, e.X - 1]);
+                    Ship sh = AppCache.CurrentMatch.OwnPlayground.fields[e.Y, e.X].ReferencedShip;
+                    sh.HitOnField(AppCache.CurrentMatch.OwnPlayground.fields[e.Y, e.X]);
                     SoundManager.SoundExplosion.Play();
                     ShipInfo shipInfo = null;
                     if (sh.IsDestroyed)
@@ -571,65 +574,69 @@ namespace Schiffchen.Logic
         void XmppManager_IncomingShotResult(object sender, ShootEventArgs e)
         {
             // Check, if the sended shot and the received shot message are talking from the same field
-            if (e.X == SendedShot.X && e.Y == SendedShot.Y)
+            if (SendedShot != null)
             {
-                if (e.Result.ToLower().Equals("water"))
+                if (e.X == SendedShot.X && e.Y == SendedShot.Y)
                 {
-                    SoundManager.SoundWater.Play();
-                    AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Water;
-                }
-                else
-                {
-                    SoundManager.SoundExplosion.Play();
-                    AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].FieldState = FieldState.Hit;
-                    // Here we still need logic, if a ship of the partner is destroyed!
-                    if (e.ShipInfo != null)
+                    if (e.Result.ToLower().Equals("water"))
                     {
-                        Boolean stop = false;
-                        for (int i = 0; (i < PartnerShips.Length && !stop); i++)
+                        SoundManager.SoundWater.Play();
+                        AppCache.CurrentMatch.ShootingPlayground.fields[e.Y, e.X].FieldState = FieldState.Water;
+                    }
+                    else
+                    {
+                        SoundManager.SoundExplosion.Play();
+                        AppCache.CurrentMatch.ShootingPlayground.fields[e.Y, e.X].FieldState = FieldState.Hit;
+                        // Here we still need logic, if a ship of the partner is destroyed!
+                        if (e.ShipInfo != null)
                         {
-                            if (PartnerShips[i] == null)
+                            Boolean stop = false;
+                            for (int i = 0; (i < PartnerShips.Length && !stop); i++)
                             {
-                                ShipType type = ShipType.AIRCRAFT_CARRIER;
-                                switch (e.ShipInfo.Size) {
-                                    case 2:
-                                        type = ShipType.DESTROYER;
-                                        break;
-                                    case 3:
-                                        type = ShipType.SUBMARINE;
-                                        break;
-                                    case 4:
-                                        type = ShipType.BATTLESHIP;
-                                        break;
-                                    case 5:
-                                        type = ShipType.AIRCRAFT_CARRIER;
-                                        break;
-                                }
+                                if (PartnerShips[i] == null)
+                                {
+                                    ShipType type = ShipType.AIRCRAFT_CARRIER;
+                                    switch (e.ShipInfo.Size)
+                                    {
+                                        case 2:
+                                            type = ShipType.DESTROYER;
+                                            break;
+                                        case 3:
+                                            type = ShipType.SUBMARINE;
+                                            break;
+                                        case 4:
+                                            type = ShipType.BATTLESHIP;
+                                            break;
+                                        case 5:
+                                            type = ShipType.AIRCRAFT_CARRIER;
+                                            break;
+                                    }
 
-                                Ship s = new GameElemens.Ship(PartnerJID, type, e.ShipInfo.Orientation, ShootingPlayground.fields[e.ShipInfo.Y - 1, e.ShipInfo.X - 1]);
-                                PartnerShips[i] = s;
-                                stop = true;
+                                    Ship s = new GameElemens.Ship(PartnerJID, type, e.ShipInfo.Orientation, ShootingPlayground.fields[e.ShipInfo.Y, e.ShipInfo.X]);
+                                    PartnerShips[i] = s;
+                                    stop = true;
+                                }
                             }
                         }
                     }
                 }
-            }
-            else
-            {
-                MessageBox.Show("Warning: Coordinates of sended shot and received shot result are different!");
-            }
-            AppCache.CurrentMatch.ShootingPlayground.fields[e.Y - 1, e.X - 1].ResetColor();
-            this.SendedShot = null;
-            FooterMenu.RemoveButton("btnAttack");
-            this.IsMyTurn = false;
-            this.switchToShipviewerMode(false);
+                else
+                {
+                    MessageBox.Show("Warning: Coordinates of sended shot and received shot result are different!");
+                }
+                AppCache.CurrentMatch.ShootingPlayground.fields[e.Y, e.X].ResetColor();
+                this.SendedShot = null;
+                FooterMenu.RemoveButton("btnAttack");
+                this.IsMyTurn = false;
+                this.switchToShipviewerMode(false);
 
-            // Lookup, if someone has won or lost
-            JID looser = getLooser();
-            if (looser != null && !GamestateSended)
-            {
-                Partner.SendGamestate(looser.BareJID);
-                this.GamestateSended = true;
+                // Lookup, if someone has won or lost
+                JID looser = getLooser();
+                if (looser != null && !GamestateSended)
+                {
+                    Partner.SendGamestate(looser.BareJID);
+                    this.GamestateSended = true;
+                }
             }
         }
 
@@ -644,7 +651,7 @@ namespace Schiffchen.Logic
             {
                 Playground pgSender = (Playground)sender;
                 pgSender.ResetFieldColors();
-                Field selectedField = pgSender.fields[e.Y - 1, e.X - 1];
+                Field selectedField = pgSender.fields[e.Y, e.X];
                 selectedField.SetColor(FieldColor.Red);
                 IconButton attack = new IconButton(TextureManager.IconAttack, "Attack", "btnAttack");
                 attack.Click += new EventHandler<EventArgs>(attack_Click);

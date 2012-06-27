@@ -171,7 +171,7 @@ namespace Schiffchen.GameElemens
                     Vector2 pos = new Vector2((float)(GridLeft + (c * FieldWidth)), (float)(GridTop + (r * FieldHeight)));
                     if (fields[r, c] == null)
                     {
-                        fields[r, c] = new Field(pos, new System.Windows.Size(FieldWidth, FieldHeight), c + 1, r + 1);
+                        fields[r, c] = new Field(pos, new System.Windows.Size(FieldWidth, FieldHeight), c, r);
                     }
                     else
                     {
