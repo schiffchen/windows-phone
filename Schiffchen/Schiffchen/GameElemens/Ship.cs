@@ -72,12 +72,13 @@ namespace Schiffchen.GameElemens
 
         }
 
+
         /// <summary>
         /// Creates a new instance of a ship, which is not placed on the playground
         /// </summary>
         /// <param name="owner">The Jabber-ID of the owner</param>
         /// <param name="type">The type</param>                
-        public Ship(JID owner, ShipType type)
+        public Ship(JID owner, ShipType type, Boolean alternate)
         {
             this.Owner = owner;
             this.IsPlaced = false;
@@ -106,7 +107,10 @@ namespace Schiffchen.GameElemens
                     this.Position = new Vector2(20, DeviceCache.BelowGrid + 20);
                     break;
                 case ShipType.SUBMARINE:
-                    this.Position = new Vector2(20 + (1 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid + 20);
+                    if (alternate)
+                        this.Position = new Vector2(20 + (1 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid + 20);
+                    else
+                        this.Position = new Vector2(20 + (5 * (this.shipTexture.Width * scaleRate)) + 20, DeviceCache.BelowGrid + 20);
                     break;
                 case ShipType.BATTLESHIP:
                     this.Position = new Vector2(20 + (2 * (this.shipTexture.Height * scaleRate)) + 20, DeviceCache.BelowGrid + 20);

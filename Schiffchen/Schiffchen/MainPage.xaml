@@ -28,7 +28,7 @@
                     <TextBlock Name="textBlock2" Text="Your Password"  />
                     <PasswordBox  Name="tbPwd" Password="test"  />
 
-                    <CheckBox Content="Anonymous Login" Name="cbAnonymous" Checked="cbAnonymous_Checked" Unchecked="cbAnonymous_Unchecked" />
+                    <CheckBox Content="Anonymous Login" Visibility="Collapsed" Name="cbAnonymous" Checked="cbAnonymous_Checked" Unchecked="cbAnonymous_Unchecked" />
 
                     <StackPanel VerticalAlignment="Bottom" Margin="0,150,0,0">
                         <Button Content="Connect" Name="btnConnect" Click="btnConnect_Click" />

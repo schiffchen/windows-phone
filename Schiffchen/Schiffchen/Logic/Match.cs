@@ -115,12 +115,13 @@ namespace Schiffchen.Logic
         /// </summary>
         private void InitializeShips()
         {
-            this.OwnShips = new Ship[4];
-            this.PartnerShips = new Ship[4];
-            this.OwnShips[0] = new Ship(this.OwnJID, ShipType.DESTROYER);
-            this.OwnShips[1] = new Ship(this.OwnJID, ShipType.SUBMARINE);
-            this.OwnShips[2] = new Ship(this.OwnJID, ShipType.BATTLESHIP);
-            this.OwnShips[3] = new Ship(this.OwnJID, ShipType.AIRCRAFT_CARRIER);
+            this.OwnShips = new Ship[5];
+            this.PartnerShips = new Ship[5];
+            this.OwnShips[0] = new Ship(this.OwnJID, ShipType.DESTROYER, false);
+            this.OwnShips[1] = new Ship(this.OwnJID, ShipType.SUBMARINE, false);
+            this.OwnShips[2] = new Ship(this.OwnJID, ShipType.SUBMARINE, true);
+            this.OwnShips[3] = new Ship(this.OwnJID, ShipType.BATTLESHIP, false);
+            this.OwnShips[4] = new Ship(this.OwnJID, ShipType.AIRCRAFT_CARRIER, false);
 
             /*
             this.PartnerShips[0] = new Ship(this.PartnerJID, ShipType.DESTROYER, System.Windows.Controls.Orientation.Vertical, currentPlayground.fields[0, 4]);
