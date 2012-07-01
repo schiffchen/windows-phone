@@ -438,6 +438,22 @@ namespace Schiffchen.Logic
                     }
                 }
             }
+            else
+            {
+                JID looser = getLooser();
+                if (looser != null)
+                {
+                    this.MatchState = Enum.MatchState.Finished;
+                    if (looser == OwnJID)
+                    {
+                        this.MatchWinner = PartnerJID;
+                    }
+                    else
+                    {
+                        this.MatchWinner = OwnJID;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -614,6 +630,7 @@ namespace Schiffchen.Logic
                                     }
 
                                     Ship s = new GameElemens.Ship(PartnerJID, type, e.ShipInfo.Orientation, ShootingPlayground.fields[e.ShipInfo.Y, e.ShipInfo.X]);
+                                    s.IsDestroyed = true;
                                     PartnerShips[i] = s;
                                     stop = true;
                                 }

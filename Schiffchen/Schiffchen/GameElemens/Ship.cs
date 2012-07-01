@@ -20,7 +20,7 @@ namespace Schiffchen.GameElemens
         public Vector2 Position { get; set; }
         public JID Owner { get; private set; }
         public Dictionary<int, bool> HitPoints { get; set; }
-        public Boolean IsDestroyed { get; private set; }
+        public Boolean IsDestroyed { get; set; }
         public Int32 Size { get; private set; }
         public System.Windows.Controls.Orientation Orientation;
         public Field StartField { get; private set; }
